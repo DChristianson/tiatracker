@@ -945,6 +945,7 @@ bool MainWindow::exportDasmFlags(QString fileName) {
     }
     flagsString.replace("%%AUTHOR%%", pTrack->metaAuthor);
     flagsString.replace("%%NAME%%", pTrack->metaName);
+    flagsString.replace("%%GLOBALSPEED%%", QString::number(pTrack->globalSpeed));
     flagsString.replace("%%EVENSPEED%%", QString::number(pTrack->evenSpeed));
     flagsString.replace("%%ODDSPEED%%", QString::number(pTrack->oddSpeed));
     bool usesGoto = pTrack->usesGoto();
