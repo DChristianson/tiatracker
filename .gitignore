@@ -1,0 +1,11 @@
+/Win32/
+/x64/
+/release/
+/debug/
+/*.dll
+/ui_*.h
+/platforms/
+/.qmake.stash
+/.vs/
+
+
