@@ -89,6 +89,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frequencyShaper->contextMenu = &waveformContextMenu;
     ui->percussionVolumeShaper->contextMenu = &waveformContextMenu;
     ui->percussionFrequencyShaper->contextMenu = &waveformContextMenu;
+
+    // Undo/Redo
+    pUndoStack = new QUndoStack(this);
+    pUndoStack->setObjectName("UndoStack");
 }
 
 /*************************************************************************/
@@ -125,6 +129,16 @@ void MainWindow::initConnections() {
     addShortcut(ui->actionPlay, "TrackPlay");
     addShortcut(ui->actionStop, "TrackStop");
     addShortcut(ui->actionPlay_pattern, "TrackPlayPattern");
+
+    // Undo/Redo
+    QAction* actionUndo = pUndoStack->createUndoAction(this, "Undo");
+    QAction* actionRedo = pUndoStack->createRedoAction(this, "Redo");
+    ui->menuTrack->addSeparator();
+    ui->menuTrack->addAction(actionUndo);
+    ui->menuTrack->addAction(actionRedo);
+    actionUndo->setShortcuts(QKeySequence::Undo);
+    actionRedo->setShortcuts(QKeySequence::Redo);
+    QObject::connect(pUndoStack, SIGNAL(indexChanged(int)), this, SLOT(update()));
 
     // Shaper context menu
     QObject::connect(&actionInsertBefore, SIGNAL(triggered(bool)), this, SLOT(insertFrameBefore(bool)));
@@ -711,6 +725,7 @@ void MainWindow::on_actionOpen_triggered() {
     }
 
     ui->trackEditor->setEditPos(0);
+    pUndoStack->clear();
     update();
 }
 
@@ -817,6 +832,7 @@ void MainWindow::on_actionNew_triggered() {
     pTrack->unlock();
     QComboBox *cbGuides = findChild<QComboBox *>("comboBoxPitchGuide");
     cbGuides->setCurrentIndex(0);
+    pUndoStack->clear();
     update();
 }
 

@@ -62,7 +62,10 @@ QMenu::item:selected {
     color: #002b36;
     background-color: #eee8d5;
 }
-
+QMenu::item:disabled {
+    color: #93a1a1;
+    background-color: #fdf6e3;
+}
 
 QLabel {
     background-color: #fdf6e3;

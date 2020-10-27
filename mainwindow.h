@@ -18,6 +18,7 @@
 #include <QList>
 #include <QMenu>
 #include <QMessageBox>
+#include <QUndoStack>
 
 
 namespace Ui {
@@ -199,6 +200,8 @@ private:
     QAction actionToggleLoop{this};
 
     QString curSongsDialogPath;
+
+    QUndoStack *pUndoStack = nullptr;
 };
 
 #endif // MAINWINDOW_H

@@ -165,6 +165,9 @@
     <ClCompile Include="waveformshaper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="trackcommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulation\SoundSDL2.h">
@@ -275,6 +278,9 @@
     <QtMoc Include="waveformshaper.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="trackcommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">

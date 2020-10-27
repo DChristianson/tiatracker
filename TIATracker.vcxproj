@@ -386,6 +386,7 @@
     <ClCompile Include="envelopeshaper.cpp" />
     <ClCompile Include="guidekeyboard.cpp" />
     <ClCompile Include="insertpatterndialog.cpp" />
+    <ClCompile Include="trackcommand.cpp" />
     <ClCompile Include="track\instrument.cpp" />
     <ClCompile Include="tiasound\instrumentpitchguide.cpp" />
     <ClCompile Include="instrumentselector.cpp" />
@@ -431,6 +432,7 @@
     </QtMoc>
     <QtMoc Include="insertpatterndialog.h">
     </QtMoc>
+    <ClInclude Include="trackcommand.h" />
     <ClInclude Include="track\instrument.h" />
     <ClInclude Include="tiasound\instrumentpitchguide.h" />
     <QtMoc Include="instrumentselector.h">

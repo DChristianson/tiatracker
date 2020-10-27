@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     optionstab.cpp \
     aboutdialog.cpp \
     guidekeyboard.cpp \
-    createguidedialog.cpp
+    createguidedialog.cpp \
+	trackcommand.cpp
 
 HEADERS  += mainwindow.h \
     pianokeyboard.h \
@@ -84,7 +85,8 @@ HEADERS  += mainwindow.h \
     optionstab.h \
     aboutdialog.h \
     guidekeyboard.h \
-    createguidedialog.h
+    createguidedialog.h \
+	trackcommand.h
 
 
 FORMS    += mainwindow.ui \

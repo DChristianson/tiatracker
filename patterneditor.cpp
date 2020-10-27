@@ -18,7 +18,7 @@
 #include "tiasound/instrumentpitchguide.h"
 #include "tiasound/tiasound.h"
 #include <QWheelEvent>
-
+#include "trackcommand.h"
 
 PatternEditor::PatternEditor(QWidget *parent) : QWidget(parent)
 {
@@ -127,19 +127,27 @@ void PatternEditor::setRowsPerBeat(int value) {
 /*************************************************************************/
 
 void PatternEditor::setRowToInstrument(int frequency) {
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+    QUndoCommand *cmd;
+
     int patternIndex = pTrack->getPatternIndex(selectedChannel, editPos);
     int noteIndex = pTrack->getNoteIndexInPattern(selectedChannel, editPos);
     int instrumentIndex = pInsSelector->getSelectedInstrument();
     if (instrumentIndex < 7) {
-        // Meldodic instrument
-        pTrack->patterns[patternIndex].notes[noteIndex].type = Track::Note::instrumentType::Instrument;
-        pTrack->patterns[patternIndex].notes[noteIndex].instrumentNumber = instrumentIndex;
-        pTrack->patterns[patternIndex].notes[noteIndex].value = frequency;
+        // Melodic instrument
+        cmd = new SetRowToInstrumentTrackCommand(pTrack, patternIndex, noteIndex, instrumentIndex, frequency);
     } else {
         // Percussion instrument
-        pTrack->patterns[patternIndex].notes[noteIndex].type = Track::Note::instrumentType::Percussion;
-        pTrack->patterns[patternIndex].notes[noteIndex].instrumentNumber = instrumentIndex - Track::Track::numInstruments;
+        cmd = new SetRowToPercussionTrackCommand(pTrack, patternIndex, noteIndex, instrumentIndex - Track::Track::numInstruments);
     }
+
+    undoStack->push(cmd);
+
+    auto text = constructRowString(noteIndex, &pTrack->patterns[patternIndex]);
+    cmd->setText(text);
+    undoStack->emit undoTextChanged(text);
+
     advanceEditPos();
     update();
 }
