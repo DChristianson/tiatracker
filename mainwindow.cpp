@@ -138,7 +138,14 @@ void MainWindow::initConnections() {
     ui->menuTrack->addAction(actionRedo);
     actionUndo->setShortcuts(QKeySequence::Undo);
     actionRedo->setShortcuts(QKeySequence::Redo);
-    QObject::connect(pUndoStack, SIGNAL(indexChanged(int)), this, SLOT(update()));
+    QObject::connect(actionUndo, SIGNAL(triggered()), this, SIGNAL(stopTrack()));
+    QObject::connect(actionRedo, SIGNAL(triggered()), this, SIGNAL(stopTrack()));
+    QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(update()));
+    QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(update()));
+    QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(updateWithUndoInfos()));
+    QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(updateWithRedoInfos()));
+    QObject::connect(pUndoStack, SIGNAL(indexChanged(int)), this, SLOT(updateUndoRedoInfos(int)));
+    statusBar()->showMessage("");
 
     // Shaper context menu
     QObject::connect(&actionInsertBefore, SIGNAL(triggered(bool)), this, SLOT(insertFrameBefore(bool)));
@@ -226,6 +233,56 @@ void MainWindow::initConnections() {
 
     // Timeline
     QObject::connect(ui->trackTimeline, SIGNAL(channelContextEvent(int,int)), ui->tabTrack, SLOT(channelContextEvent(int,int)));
+}
+
+/*************************************************************************/
+
+void MainWindow::commandInfo::setCommand(const TrackCommand* cmd)
+{
+    text = cmd ? cmd->text() : "";
+    selectedChannel = cmd ? cmd->selectedChannel : -1;
+    editPos = cmd ? cmd->editPos : -1;
+}
+
+/*************************************************************************/
+
+void MainWindow::updateUndoRedoInfos(int index)
+{
+    nextUndoInfo.setCommand(iUndoStackIndex > 0 ? dynamic_cast<const TrackCommand*>(pUndoStack->command(iUndoStackIndex-1)) : nullptr);
+    nextRedoInfo.setCommand(dynamic_cast<const TrackCommand*>(pUndoStack->command(iUndoStackIndex)));
+    iUndoStackIndex = index;
+}
+
+/*************************************************************************/
+
+void MainWindow::updateWithUndoInfos()
+{
+    statusBar()->showMessage("Undone: " + nextUndoInfo.text);
+
+    if (nextUndoInfo.editPos != -1) {
+        if (nextUndoInfo.selectedChannel != -1) {
+            ui->trackEditor->setEditPos(nextUndoInfo.selectedChannel, nextUndoInfo.editPos);
+        }
+        else {
+            ui->trackEditor->setEditPos(nextUndoInfo.editPos);
+        }
+    }
+}
+
+/*************************************************************************/
+
+void MainWindow::updateWithRedoInfos()
+{
+    statusBar()->showMessage("Redone: " + nextRedoInfo.text);
+
+    if (nextRedoInfo.editPos != -1) {
+        if (nextRedoInfo.selectedChannel != -1) {
+            ui->trackEditor->setEditPos(nextRedoInfo.selectedChannel, nextRedoInfo.editPos+1);
+        }
+        else {
+            ui->trackEditor->setEditPos(nextRedoInfo.editPos+1);
+        }
+    }
 }
 
 /*************************************************************************/

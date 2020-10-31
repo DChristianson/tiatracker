@@ -12,6 +12,9 @@ protected:
     Track::Track* pTrack;
 
 public:
+    int selectedChannel = -1;
+    int editPos = -1;
+
     TrackCommand(Track::Track* track, const QString &text, QUndoCommand *parent = nullptr) :QUndoCommand(text, parent), pTrack(track) {}
 };
 

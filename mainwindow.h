@@ -14,6 +14,7 @@
 #include "tiasound/pitchguide.h"
 #include "tiasound/pitchguidefactory.h"
 #include "emulation/player.h"
+#include "trackcommand.h"
 
 #include <QList>
 #include <QMenu>
@@ -152,6 +153,12 @@ private slots:
 
     void on_actionExport_complete_player_to_MADS_triggered();
 
+    void updateUndoRedoInfos(int);
+
+    void updateWithUndoInfos();
+
+    void updateWithRedoInfos();
+
 private:
     /* Tab index values */
     static const int iTabTrack = 0;
@@ -202,6 +209,15 @@ private:
     QString curSongsDialogPath;
 
     QUndoStack *pUndoStack = nullptr;
+    struct commandInfo {
+        QString text;
+        int selectedChannel;
+        int editPos;
+        void setCommand(const TrackCommand* cmd);
+    };
+    commandInfo nextUndoInfo = commandInfo{};
+    commandInfo nextRedoInfo = commandInfo{};
+    int iUndoStackIndex = 0;
 };
 
 #endif // MAINWINDOW_H

@@ -129,7 +129,7 @@ void PatternEditor::setRowsPerBeat(int value) {
 void PatternEditor::setRowToInstrument(int frequency) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
-    QUndoCommand *cmd;
+    TrackCommand *cmd;
 
     int patternIndex = pTrack->getPatternIndex(selectedChannel, editPos);
     int noteIndex = pTrack->getNoteIndexInPattern(selectedChannel, editPos);
@@ -147,6 +147,9 @@ void PatternEditor::setRowToInstrument(int frequency) {
     auto text = constructRowString(noteIndex, &pTrack->patterns[patternIndex]);
     cmd->setText(text);
     undoStack->emit undoTextChanged(text);
+
+    cmd->selectedChannel = selectedChannel;
+    cmd->editPos = editPos;
 
     advanceEditPos();
     update();
