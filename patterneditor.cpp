@@ -129,29 +129,31 @@ void PatternEditor::setRowsPerBeat(int value) {
 void PatternEditor::setRowToInstrument(int frequency) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
-    TrackCommand *cmd;
+    SetRowToNoteCommand *cmd;
 
     int patternIndex = pTrack->getPatternIndex(selectedChannel, editPos);
     int noteIndex = pTrack->getNoteIndexInPattern(selectedChannel, editPos);
     int instrumentIndex = pInsSelector->getSelectedInstrument();
     if (instrumentIndex < 7) {
         // Melodic instrument
-        cmd = new SetRowToInstrumentTrackCommand(pTrack, patternIndex, noteIndex, instrumentIndex, frequency);
+        cmd = new SetRowToInstrumentCommand(pTrack, patternIndex, noteIndex, instrumentIndex, frequency);
     } else {
         // Percussion instrument
-        cmd = new SetRowToPercussionTrackCommand(pTrack, patternIndex, noteIndex, instrumentIndex - Track::Track::numInstruments);
+        cmd = new SetRowToPercussionCommand(pTrack, patternIndex, noteIndex, instrumentIndex - Track::Track::numInstruments);
     }
 
-    undoStack->push(cmd);
+    // update tab update as a post step
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
-    auto text = constructRowString(noteIndex, &pTrack->patterns[patternIndex]);
-    cmd->setText(text);
-    undoStack->emit undoTextChanged(text);
+    cmd->setText(constructRowString(noteIndex, cmd->newNote()));
 
-    cmd->selectedChannel = selectedChannel;
-    cmd->editPos = editPos;
+    // hold gui stuffs in cmd:
+    cmd->ci.selectedChannel = selectedChannel;
+    cmd->ci.editPosFrom = editPos;
+    cmd->ci.editPosTo = editPos + 1;
 
-    advanceEditPos();
+    undoStack->push(cmd); // post and redo methods are called here
+
     update();
 }
 
@@ -270,18 +272,24 @@ void PatternEditor::gotoPreviousPattern(bool) {
 /*************************************************************************/
 
 QString PatternEditor::constructRowString(int curPatternNoteIndex, Track::Pattern *curPattern) {
+    return constructRowString(curPatternNoteIndex, curPattern->notes[curPatternNoteIndex]);
+}
+
+/*************************************************************************/
+
+QString PatternEditor::constructRowString(int curPatternNoteIndex, const Track::Note& note) {
     QString rowText = QString::number(curPatternNoteIndex + 1);
     if (curPatternNoteIndex + 1 < 10) {
         rowText.prepend("  ");
     } else if (curPatternNoteIndex + 1 < 100) {
         rowText.prepend(" ");
     }
-    switch (curPattern->notes[curPatternNoteIndex].type) {
+    switch (note.type) {
     case Track::Note::instrumentType::Hold:
         rowText.append(":    |");
         break;
     case Track::Note::instrumentType::Slide: {
-        int frequency = curPattern->notes[curPatternNoteIndex].value;
+        int frequency = note.value;
         rowText.append(":   ");
         rowText.append("  SL");
         // Frequency change
@@ -297,7 +305,7 @@ QString PatternEditor::constructRowString(int curPatternNoteIndex, Track::Patter
         rowText.append(":   ---");
         break;
     case Track::Note::instrumentType::Percussion: {
-        int percNum = curPattern->notes[curPatternNoteIndex].instrumentNumber + 1;
+        int percNum = note.instrumentNumber + 1;
         if (percNum < 10) {
             rowText.append(":   P ");
         } else {
@@ -307,9 +315,9 @@ QString PatternEditor::constructRowString(int curPatternNoteIndex, Track::Patter
         break;
     }
     case Track::Note::instrumentType::Instrument: {
-        int insNum = curPattern->notes[curPatternNoteIndex].instrumentNumber;
+        int insNum = note.instrumentNumber;
         // Pitch
-        int frequency = curPattern->notes[curPatternNoteIndex].value;
+        int frequency = note.value;
         TiaSound::Distortion dist = pTrack->instruments[insNum].baseDistortion;
         // In case the instrument got changed from PURE_COMBINED to something else
         if (frequency > 31 && dist != TiaSound::Distortion::PURE_COMBINED) {

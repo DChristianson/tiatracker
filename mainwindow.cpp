@@ -93,6 +93,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // Undo/Redo
     pUndoStack = new QUndoStack(this);
     pUndoStack->setObjectName("UndoStack");
+    pStopTrack = new UndoStep(this);
+    pStopTrack->setObjectName("StopTrack");
+    pTrackTabUpdate = new UndoStep(this);
+    pTrackTabUpdate->setObjectName("TrackTabUpdate");
 }
 
 /*************************************************************************/
@@ -138,13 +142,10 @@ void MainWindow::initConnections() {
     ui->menuTrack->addAction(actionRedo);
     actionUndo->setShortcuts(QKeySequence::Undo);
     actionRedo->setShortcuts(QKeySequence::Redo);
-    QObject::connect(actionUndo, SIGNAL(triggered()), this, SIGNAL(stopTrack()));
-    QObject::connect(actionRedo, SIGNAL(triggered()), this, SIGNAL(stopTrack()));
+    QObject::connect(pStopTrack, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SIGNAL(stopTrack()));
+    QObject::connect(pTrackTabUpdate, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SLOT(updateWithCommandInfos(bool, const QString&, const commandInfo&)));
     QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(update()));
     QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(update()));
-    QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(updateWithUndoInfos()));
-    QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(updateWithRedoInfos()));
-    QObject::connect(pUndoStack, SIGNAL(indexChanged(int)), this, SLOT(updateUndoRedoInfos(int)));
     statusBar()->showMessage("");
 
     // Shaper context menu
@@ -235,54 +236,26 @@ void MainWindow::initConnections() {
     QObject::connect(ui->trackTimeline, SIGNAL(channelContextEvent(int,int)), ui->tabTrack, SLOT(channelContextEvent(int,int)));
 }
 
-/*************************************************************************/
-
-void MainWindow::commandInfo::setCommand(const TrackCommand* cmd)
-{
-    text = cmd ? cmd->text() : "";
-    selectedChannel = cmd ? cmd->selectedChannel : -1;
-    editPos = cmd ? cmd->editPos : -1;
-}
 
 /*************************************************************************/
 
-void MainWindow::updateUndoRedoInfos(int index)
+void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const commandInfo& ci)
 {
-    nextUndoInfo.setCommand(iUndoStackIndex > 0 ? dynamic_cast<const TrackCommand*>(pUndoStack->command(iUndoStackIndex-1)) : nullptr);
-    nextRedoInfo.setCommand(dynamic_cast<const TrackCommand*>(pUndoStack->command(iUndoStackIndex)));
-    iUndoStackIndex = index;
-}
+    statusBar()->showMessage((undo?"Undone: ":"Done: ") + text);
 
-/*************************************************************************/
+    int editPos = undo ? ci.editPosFrom : ci.editPosTo;
 
-void MainWindow::updateWithUndoInfos()
-{
-    statusBar()->showMessage("Undone: " + nextUndoInfo.text);
-
-    if (nextUndoInfo.editPos != -1) {
-        if (nextUndoInfo.selectedChannel != -1) {
-            ui->trackEditor->setEditPos(nextUndoInfo.selectedChannel, nextUndoInfo.editPos);
+    if (editPos != -1) {
+        if (ci.selectedChannel != -1) {
+            ui->trackEditor->setEditPos(ci.selectedChannel, editPos);
         }
         else {
-            ui->trackEditor->setEditPos(nextUndoInfo.editPos);
+            ui->trackEditor->setEditPos(editPos);
         }
     }
-}
 
-/*************************************************************************/
-
-void MainWindow::updateWithRedoInfos()
-{
-    statusBar()->showMessage("Redone: " + nextRedoInfo.text);
-
-    if (nextRedoInfo.editPos != -1) {
-        if (nextRedoInfo.selectedChannel != -1) {
-            ui->trackEditor->setEditPos(nextRedoInfo.selectedChannel, nextRedoInfo.editPos+1);
-        }
-        else {
-            ui->trackEditor->setEditPos(nextRedoInfo.editPos+1);
-        }
-    }
+    if (ci.stats)
+        ui->tabTrack->updateTrackStats();
 }
 
 /*************************************************************************/

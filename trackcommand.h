@@ -6,19 +6,46 @@
 #include "track/track.h"
 #include "track/note.h"
 
+#include "undostep.h"
+
 class TrackCommand : public QUndoCommand
 {
+public:
+    commandInfo ci;
+
 protected:
     Track::Track* pTrack;
 
-public:
-    int selectedChannel = -1;
-    int editPos = -1;
+    void pre_emit(bool undo) {
+        if (pre)
+            pre->emit step(undo, text(), ci);
+    }
 
-    TrackCommand(Track::Track* track, const QString &text, QUndoCommand *parent = nullptr) :QUndoCommand(text, parent), pTrack(track) {}
+    void post_emit(bool undo) {
+        if (post)
+            post->emit step(undo, text(), ci);
+    }
+
+    virtual void pre_undo() { pre_emit(true); }
+    virtual void pre_redo() { pre_emit(false); }
+    virtual void post_undo() { post_emit(true); }
+    virtual void post_redo() { post_emit(false); }
+
+public:
+    UndoStep* pre = nullptr;
+    UndoStep* post = nullptr;
+
+    TrackCommand(Track::Track* track, const QString &text, QUndoCommand *parent = nullptr)
+        :QUndoCommand(text, parent), pTrack(track) {}
+    
+    virtual void do_undo() { QUndoCommand::undo(); }
+    virtual void do_redo() { QUndoCommand::redo(); }
+
+    void undo() final { pre_undo(); do_undo(); post_undo(); }
+    void redo() final { pre_redo(); do_redo(); post_redo(); }
 };
 
-class SetRowToNoteTrackCommand : public TrackCommand
+class SetRowToNoteCommand : public TrackCommand
 {
     Track::Note oldNote;
 
@@ -27,32 +54,60 @@ protected:
     int iNoteIndex;
 
 public:
-    SetRowToNoteTrackCommand(Track::Track* track, int patternIndex, int noteIndex, QUndoCommand *parent = nullptr);
+    SetRowToNoteCommand(Track::Track* track, int patternIndex, int noteIndex);
 
-    void undo() override;
+    virtual Track::Note newNote() const = 0;
+
+    void do_undo() final;
+    void do_redo() final;
 };
 
-class SetRowToInstrumentTrackCommand : public SetRowToNoteTrackCommand
+class SetRowToInstrumentCommand : public SetRowToNoteCommand
 {
     int iInstrumentIndex;
     int iFrequency;
 
 public:
-    explicit SetRowToInstrumentTrackCommand(Track::Track* track, int patternIndex, int noteIndex, int instrumentIndex, int frequency,
-        QUndoCommand *parent = nullptr);
+    SetRowToInstrumentCommand(Track::Track* track, int patternIndex, int noteIndex, int instrumentIndex, int frequency);
 
-    void redo() override;
+    Track::Note newNote() const final;
 };
 
-class SetRowToPercussionTrackCommand : public SetRowToNoteTrackCommand
+class SetRowToPercussionCommand : public SetRowToNoteCommand
 {
     int iPercussionIndex;
 
 public:
-    explicit SetRowToPercussionTrackCommand(Track::Track* track, int patternIndex, int noteIndex, int percussionIndex,
+    SetRowToPercussionCommand(Track::Track* track, int patternIndex, int noteIndex, int percussionIndex);
+
+    Track::Note newNote() const final;
+};
+
+
+class CreatePatternCommand : public TrackCommand
+{
+    Track::Pattern pattern;
+
+public:
+    CreatePatternCommand(Track::Track* track, const Track::Pattern& newPattern, QUndoCommand *parent);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
+class InsertPatternCommand : public TrackCommand
+{
+    int iPatternIndex;
+    int iChannel;
+    int iNoteIndex;
+    int iEntryIndex;
+
+public:
+    InsertPatternCommand(Track::Track* track, bool doBefore, int patternIndex, int channel, int noteIndex,
         QUndoCommand *parent = nullptr);
 
-    void redo() override;
+    void do_undo() final;
+    void do_redo() final;
 };
 
 #endif // TRACKCOMMAND_H

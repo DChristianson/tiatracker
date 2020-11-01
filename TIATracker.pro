@@ -86,7 +86,8 @@ HEADERS  += mainwindow.h \
     aboutdialog.h \
     guidekeyboard.h \
     createguidedialog.h \
-	trackcommand.h
+	trackcommand.h \
+	undostep.h
 
 
 FORMS    += mainwindow.ui \

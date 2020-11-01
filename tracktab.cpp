@@ -320,30 +320,45 @@ void TrackTab::movePatternDown(bool) {
 /*************************************************************************/
 
 void TrackTab::insertPatternBefore(bool) {
-    emit stopTrack();
-    int patternIndex = choosePatternToInsert(true);
-    if (patternIndex == -1) {
-        return;
-    }
-    int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
-    Track::SequenceEntry newEntry(patternIndex);
-    pTrack->channelSequences[contextEventChannel].sequence.insert(entryIndex, newEntry);
-    pTrack->updateFirstNoteNumbers();
-    update();
+    insertPattern(true);
 }
 
 /*************************************************************************/
 
 void TrackTab::insertPatternAfter(bool) {
-    emit stopTrack();
-    int patternIndex = choosePatternToInsert(false);
+    insertPattern(false);
+}
+
+/*************************************************************************/
+
+void TrackTab::insertPattern(bool doBefore) {
+
+    emit stopTrack(); // do not remove because of modal dialog below
+    TrackCommand* macro = nullptr;
+    QString patternName;
+    int patternIndex = choosePatternToInsert(doBefore, macro, patternName);
     if (patternIndex == -1) {
         return;
     }
-    int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
-    Track::SequenceEntry newEntry(patternIndex);
-    pTrack->channelSequences[contextEventChannel].sequence.insert(entryIndex + 1, newEntry);
-    pTrack->updateFirstNoteNumbers();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new InsertPatternCommand(pTrack, doBefore, patternIndex, contextEventChannel, contextEventNoteIndex, macro);
+
+    auto upper_cmd = macro ? macro : cmd;
+
+    QString cmdName = "Insert pattern \"" + patternName + (doBefore?"\" (before)": "\" (after)");
+    upper_cmd->setText(cmdName);
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    upper_cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    upper_cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    // hold gui stuffs in the uppest command:
+    upper_cmd->ci.stats = true;
+
+    undoStack->push(upper_cmd); // pre, post and redo methods are called here
+
     update();
 }
 
@@ -601,7 +616,7 @@ void TrackTab::updatePatternEditor() {
 
 /*************************************************************************/
 
-int TrackTab::choosePatternToInsert(bool doBefore) {
+int TrackTab::choosePatternToInsert(bool doBefore, TrackCommand*& macro, QString& patternName) {
     InsertPatternDialog dialog(this);
     dialog.prepare(pTrack);
     if (dialog.exec() == QDialog::Accepted) {
@@ -632,11 +647,16 @@ int TrackTab::choosePatternToInsert(bool doBefore) {
                     newPattern.notes.append(newNote);
                 }
                 // Add new pattern
-                pTrack->patterns.append(newPattern);
+                macro = new TrackCommand(pTrack, "");
+                new CreatePatternCommand(pTrack, newPattern, macro);
+                patternName = newPattern.name;
                 lastNewPatternLength = newLength;
             } else {
                 return -1;
             }
+        }
+        else {
+            patternName = pTrack->patterns[result].name;
         }
         return result;
     } else {

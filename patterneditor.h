@@ -35,6 +35,7 @@ public:
     int getEditPos();
     int getSelectedChannel();
 
+    QString constructRowString(int curPatternNoteIndex, const Track::Note& note);
     QString constructRowString(int curPatternNoteIndex, Track::Pattern *curPattern);
 
     QSize sizeHint() const;

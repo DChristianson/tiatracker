@@ -380,4 +380,9 @@
   <ItemGroup>
     <ResourceCompile Include=".\TIATracker_resource.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="undostep.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
 </Project>

@@ -432,6 +432,7 @@
     </QtMoc>
     <QtMoc Include="insertpatterndialog.h">
     </QtMoc>
+    <QtMoc Include="undostep.h" />
     <ClInclude Include="trackcommand.h" />
     <ClInclude Include="track\instrument.h" />
     <ClInclude Include="tiasound\instrumentpitchguide.h" />

@@ -17,6 +17,7 @@
 #include <QMenu>
 #include <QAction>
 #include "emulation/player.h"
+#include "trackcommand.h"
 
 
 class TrackTab : public QWidget
@@ -84,9 +85,11 @@ private:
     /* Lets the user select a pattern to insert. Returns index of
      * Pattern, or patterns.size() if create new was pressed,
      * or -1 if cancel was pressed. */
-    int choosePatternToInsert(bool doBefore);
+    int choosePatternToInsert(bool doBefore, TrackCommand*& macro, QString& patternName);
 
     void addShortcut(QAction *action, QString actionName);
+
+    void insertPattern(bool doBefore);
 
     Track::Track *pTrack = nullptr;
     TiaSound::PitchGuide *pPitchGuide;
