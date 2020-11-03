@@ -123,4 +123,19 @@ public:
     void do_redo() final;
 };
 
+class DuplicatePatternCommand : public TrackCommand
+{
+    int iPatternIndex;
+    int iChannel;
+    int iNoteIndex;
+    int iEntryIndex;
+    QString sPatternName;
+
+public:
+    DuplicatePatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex, const QString& patternName);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
 #endif // TRACKCOMMAND_H

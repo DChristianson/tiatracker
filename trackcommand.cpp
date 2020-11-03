@@ -114,3 +114,32 @@ void MovePatternCommand::do_redo()
     pTrack->channelSequences[iChannel].sequence.swap(iEntryIndexFrom, iEntryIndexTo);
     pTrack->updateFirstNoteNumbers();
 }
+
+// DuplicatePatternCommand
+
+DuplicatePatternCommand::DuplicatePatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex,
+    const QString& patternName) :
+    TrackCommand(track, "", nullptr),
+    iPatternIndex(patternIndex),
+    iChannel(channel),
+    iNoteIndex(noteIndex),
+    iEntryIndex(entryIndex),
+    sPatternName(patternName)
+{
+}
+
+void DuplicatePatternCommand::do_undo()
+{
+    pTrack->channelSequences[iChannel].sequence.removeAt(iEntryIndex + 1);
+    pTrack->patterns.removeLast();
+    pTrack->updateFirstNoteNumbers();
+}
+
+void DuplicatePatternCommand::do_redo()
+{
+    pTrack->patterns.append(pTrack->patterns[iPatternIndex]);
+    pTrack->patterns.last().name = sPatternName;
+    Track::SequenceEntry newEntry(pTrack->patterns.size() - 1);
+    pTrack->channelSequences[iChannel].sequence.insert(iEntryIndex + 1, newEntry);
+    pTrack->updateFirstNoteNumbers();
+}

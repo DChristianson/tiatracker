@@ -434,20 +434,30 @@ void TrackTab::removePattern(bool) {
 /*************************************************************************/
 
 void TrackTab::duplicatePattern(bool) {
-    emit stopTrack();
+    emit stopTrack(); // do not remove because of modal dialog below
     RenamePatternDialog dialog(this);
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
     int patternIndex = pTrack->channelSequences[contextEventChannel].sequence[entryIndex].patternIndex;
     dialog.setPatternName(pTrack->patterns[patternIndex].name);
-    if (dialog.exec() == QDialog::Accepted) {
-        pTrack->patterns.append(pTrack->patterns[patternIndex]);
-        pTrack->patterns.last().name = dialog.getPatternName();
-        int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
-        Track::SequenceEntry newEntry(pTrack->patterns.size() - 1);
-        pTrack->channelSequences[contextEventChannel].sequence.insert(entryIndex + 1, newEntry);
-        pTrack->updateFirstNoteNumbers();
-        update();
-    }
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new DuplicatePatternCommand(pTrack, patternIndex, contextEventChannel, contextEventNoteIndex,
+        entryIndex, dialog.getPatternName());
+
+    cmd->setText("Duplicate pattern");
+
+    // stop track as a pre step in cmd
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+
+    // hold gui stuffs in the command:
+    cmd->ci.stats = true;
+
+    undoStack->push(cmd);
+
+    update();
 }
 
 /*************************************************************************/
