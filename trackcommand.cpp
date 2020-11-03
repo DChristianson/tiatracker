@@ -70,12 +70,11 @@ void CreatePatternCommand::do_redo()
 
 // InsertPatternCommand
 
-InsertPatternCommand::InsertPatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex,
+InsertPatternCommand::InsertPatternCommand(Track::Track* track, int patternIndex, int channel, int entryIndex,
     QUndoCommand *parent /*= nullptr*/) :
     TrackCommand(track, "", parent),
     iPatternIndex(patternIndex),
     iChannel(channel),
-    iNoteIndex(noteIndex),
     iEntryIndex(entryIndex)
 {
 }
@@ -117,12 +116,11 @@ void MovePatternCommand::do_redo()
 
 // DuplicatePatternCommand
 
-DuplicatePatternCommand::DuplicatePatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex,
+DuplicatePatternCommand::DuplicatePatternCommand(Track::Track* track, int patternIndex, int channel, int entryIndex,
     const QString& patternName) :
     TrackCommand(track, "", nullptr),
     iPatternIndex(patternIndex),
     iChannel(channel),
-    iNoteIndex(noteIndex),
     iEntryIndex(entryIndex),
     sPatternName(patternName)
 {
@@ -142,4 +140,65 @@ void DuplicatePatternCommand::do_redo()
     Track::SequenceEntry newEntry(pTrack->patterns.size() - 1);
     pTrack->channelSequences[iChannel].sequence.insert(iEntryIndex + 1, newEntry);
     pTrack->updateFirstNoteNumbers();
+}
+
+// RemovePatternCommand
+
+RemovePatternCommand::RemovePatternCommand(Track::Track* track, int patternIndex, int channel, int entryIndex, bool deletePattern) :
+    TrackCommand(track, "", nullptr),
+    iPatternIndex(patternIndex),
+    iChannel(channel),
+    iEntryIndex(entryIndex),
+    bDeletePattern(deletePattern),
+    pattern()
+{
+    if (bDeletePattern)
+        pattern = pTrack->patterns[iPatternIndex];
+}
+
+void RemovePatternCommand::do_undo()
+{
+    // Validate gotos
+    for (int i = 0; i < pTrack->channelSequences[iChannel].sequence.size(); ++i) {
+        if (pTrack->channelSequences[iChannel].sequence[i].gotoTarget+1 >= iEntryIndex) {
+            pTrack->channelSequences[iChannel].sequence[i].gotoTarget++;
+        }
+    }
+
+    // Create pattern
+    if (bDeletePattern) {
+        pTrack->patterns.insert(iPatternIndex, pattern);
+    }
+
+    // Insert pattern
+    pTrack->channelSequences[iChannel].sequence.insert(iEntryIndex, iPatternIndex);
+    pTrack->updateFirstNoteNumbers();
+
+}
+
+void RemovePatternCommand::do_redo()
+{
+    // Remove pattern
+    pTrack->channelSequences[iChannel].sequence.removeAt(iEntryIndex);
+    pTrack->updateFirstNoteNumbers();
+
+    // Delete pattern if asked for
+    if (bDeletePattern) {
+        // Correct SequenceEntries
+        for (int channel = 0; channel < 2; ++channel) {
+            for (int i = 0; i < pTrack->channelSequences[channel].sequence.size(); ++i) {
+                if (pTrack->channelSequences[channel].sequence[i].patternIndex > iPatternIndex) {
+                    pTrack->channelSequences[channel].sequence[i].patternIndex--;
+                }
+            }
+        }
+        pTrack->patterns.removeAt(iPatternIndex);
+    }
+
+    // Validate gotos
+    for (int i = 0; i < pTrack->channelSequences[iChannel].sequence.size(); ++i) {
+        if (pTrack->channelSequences[iChannel].sequence[i].gotoTarget >= iEntryIndex) {
+            pTrack->channelSequences[iChannel].sequence[i].gotoTarget--;
+        }
+    }
 }

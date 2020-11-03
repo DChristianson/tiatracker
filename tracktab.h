@@ -78,6 +78,8 @@ public slots:
     // Player error
     void invalidNoteFound(int channel, int entryIndex, int noteIndex, QString reason);
 
+    void copyEditPos(int pos);
+
 private:
     /* Updates the pattern editor area */
     void updatePatternEditor();
@@ -136,6 +138,7 @@ private:
 
     // Last value the user selected for length of new pattern
     int lastNewPatternLength = 32;
+    int editPosCopy = 0;
 };
 
 #endif // TRACKTAB_H

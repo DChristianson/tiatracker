@@ -223,6 +223,7 @@ void MainWindow::initConnections() {
     // Pattern editor
     QObject::connect(ui->trackEditor, SIGNAL(editPosChanged(int)), ui->trackTimeline, SLOT(editPosChanged(int)));
     QObject::connect(ui->trackEditor, SIGNAL(editPosChanged(int)), this, SLOT(updateSpeedSpinBoxes(int)));
+    QObject::connect(ui->trackEditor, SIGNAL(editPosChanged(int)), ui->tabTrack, SLOT(copyEditPos(int)));
     QObject::connect(ui->trackTimeline, SIGNAL(changeEditPos(int)), ui->trackEditor, SLOT(setEditPos(int)));
     QObject::connect(ui->trackTimeline, SIGNAL(changeEditPos(int, int)), ui->trackEditor, SLOT(setEditPos(int, int)));
     QObject::connect(ui->trackInstrumentSelector, SIGNAL(setWaveform(TiaSound::Distortion)), this, SLOT(setWaveform(TiaSound::Distortion)));

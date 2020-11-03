@@ -357,7 +357,7 @@ void TrackTab::insertPattern(bool doBefore) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
-    auto cmd = new InsertPatternCommand(pTrack, patternIndex, contextEventChannel, contextEventNoteIndex, 
+    auto cmd = new InsertPatternCommand(pTrack, patternIndex, contextEventChannel,
         pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex) + doBefore ? 0 : 1,
         macro);
 
@@ -380,8 +380,15 @@ void TrackTab::insertPattern(bool doBefore) {
 
 /*************************************************************************/
 
+void TrackTab::copyEditPos(int pos)
+{
+    editPosCopy = pos;
+}
+
+/*************************************************************************/
+
 void TrackTab::removePattern(bool) {
-    emit stopTrack();
+    emit stopTrack(); // do not remove because of modal dialog(s) below
     if (pTrack->channelSequences[contextEventChannel].sequence.size() == 1) {
         MainWindow::displayMessage("A channel must contain at least one pattern!");
         return;
@@ -389,45 +396,52 @@ void TrackTab::removePattern(bool) {
 
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
     int patternIndex = pTrack->channelSequences[contextEventChannel].sequence[entryIndex].patternIndex;
-    pTrack->channelSequences[contextEventChannel].sequence.removeAt(entryIndex);
-    pTrack->updateFirstNoteNumbers();
+    
     // Check if pattern is no longer used anywhere
     bool wasLast = true;
+    int found = 0;
     for (int channel = 0; channel < 2 && wasLast; ++channel) {
         for (int i = 0; i < pTrack->channelSequences[channel].sequence.size(); ++i) {
             if (pTrack->channelSequences[channel].sequence[i].patternIndex == patternIndex) {
-                wasLast = false;
-                break;
+                if (++found > 1) {
+                    wasLast = false;
+                    break;
+                }
             }
         }
     }
+    bool deletePattern = false;
     if (wasLast) {
         QMessageBox msgBox(QMessageBox::NoIcon,
                            "Delete Pattern?",
                            "This pattern is no longer used in the track. Do you want to delete it?",
                            QMessageBox::Yes | QMessageBox::No, this,
                            Qt::FramelessWindowHint);
-        if (msgBox.exec() == QMessageBox::Yes) {
-            // Correct SequenceEntries
-            for (int channel = 0; channel < 2; ++channel) {
-                for (int i = 0; i < pTrack->channelSequences[channel].sequence.size(); ++i) {
-                    if (pTrack->channelSequences[channel].sequence[i].patternIndex > patternIndex) {
-                        pTrack->channelSequences[channel].sequence[i].patternIndex--;
-                    }
-                }
-            }
-            pTrack->patterns.removeAt(patternIndex);
-            pTrack->updateFirstNoteNumbers();
-        }
-    }
-    // Validate gotos
-    for (int i = 0; i < pTrack->channelSequences[contextEventChannel].sequence.size(); ++i) {
-        if (pTrack->channelSequences[contextEventChannel].sequence[i].gotoTarget >= entryIndex) {
-            pTrack->channelSequences[contextEventChannel].sequence[i].gotoTarget--;
-        }
+        deletePattern = (msgBox.exec() == QMessageBox::Yes);
     }
 
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new RemovePatternCommand(pTrack, patternIndex, contextEventChannel, entryIndex, deletePattern);
+
+    cmd->setText(deletePattern ? "Remove and Delete pattern" : "Remove pattern");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    // hold gui stuffs in the command:
+    cmd->ci.stats = true;
+
+    undoStack->push(cmd);
+
+    cmd->ci.editPosFrom = editPosCopy;
+
     emit validateEditPos();
+
+    cmd->ci.selectedChannel = contextEventChannel;
+    cmd->ci.editPosTo = editPosCopy;
+
     update();
 }
 
@@ -444,13 +458,14 @@ void TrackTab::duplicatePattern(bool) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
-    auto cmd = new DuplicatePatternCommand(pTrack, patternIndex, contextEventChannel, contextEventNoteIndex,
-        entryIndex, dialog.getPatternName());
+    auto cmd = new DuplicatePatternCommand(pTrack, patternIndex, contextEventChannel, entryIndex,
+        dialog.getPatternName());
 
     cmd->setText("Duplicate pattern");
 
-    // stop track as a pre step in cmd
+    // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     // hold gui stuffs in the command:
     cmd->ci.stats = true;

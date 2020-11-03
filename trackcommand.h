@@ -99,11 +99,10 @@ class InsertPatternCommand : public TrackCommand
 {
     int iPatternIndex;
     int iChannel;
-    int iNoteIndex;
     int iEntryIndex;
 
 public:
-    InsertPatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex,
+    InsertPatternCommand(Track::Track* track, int patternIndex, int channel, int entryIndex,
         QUndoCommand *parent = nullptr);
 
     void do_undo() final;
@@ -127,12 +126,26 @@ class DuplicatePatternCommand : public TrackCommand
 {
     int iPatternIndex;
     int iChannel;
-    int iNoteIndex;
     int iEntryIndex;
     QString sPatternName;
 
 public:
-    DuplicatePatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex, const QString& patternName);
+    DuplicatePatternCommand(Track::Track* track, int patternIndex, int channel, int entryIndex, const QString& patternName);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
+class RemovePatternCommand : public TrackCommand
+{
+    int iPatternIndex;
+    int iChannel;
+    int iEntryIndex;
+    bool bDeletePattern;
+    Track::Pattern pattern;
+
+public:
+    RemovePatternCommand(Track::Track* track, int patternIndex, int channel, int entryIndex, bool deletePattern);
 
     void do_undo() final;
     void do_redo() final;
