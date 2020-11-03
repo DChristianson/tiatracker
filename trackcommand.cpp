@@ -70,15 +70,14 @@ void CreatePatternCommand::do_redo()
 
 // InsertPatternCommand
 
-InsertPatternCommand::InsertPatternCommand(Track::Track* track, bool doBefore, int patternIndex, int channel, int noteIndex,
+InsertPatternCommand::InsertPatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex,
     QUndoCommand *parent /*= nullptr*/) :
     TrackCommand(track, "", parent),
     iPatternIndex(patternIndex),
     iChannel(channel),
     iNoteIndex(noteIndex),
-    iEntryIndex(pTrack->getSequenceEntryIndex(iChannel, iNoteIndex)+doBefore?0:1)
+    iEntryIndex(entryIndex)
 {
-
 }
 
 void InsertPatternCommand::do_undo()
@@ -91,5 +90,27 @@ void InsertPatternCommand::do_redo()
 {
     Track::SequenceEntry newEntry(iPatternIndex);
     pTrack->channelSequences[iChannel].sequence.insert(iEntryIndex, newEntry);
+    pTrack->updateFirstNoteNumbers();
+}
+
+// MovePatternCommand
+
+MovePatternCommand::MovePatternCommand(Track::Track* track, int channel, int entryIndexFrom, int entryIndexTo) :
+    TrackCommand(track, "", nullptr),
+    iChannel(channel),
+    iEntryIndexFrom(entryIndexFrom),
+    iEntryIndexTo(entryIndexTo)
+{
+}
+
+void MovePatternCommand::do_undo()
+{
+    pTrack->channelSequences[iChannel].sequence.swap(iEntryIndexTo, iEntryIndexFrom);
+    pTrack->updateFirstNoteNumbers();
+}
+
+void MovePatternCommand::do_redo()
+{
+    pTrack->channelSequences[iChannel].sequence.swap(iEntryIndexFrom, iEntryIndexTo);
     pTrack->updateFirstNoteNumbers();
 }

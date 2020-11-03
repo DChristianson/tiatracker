@@ -295,26 +295,40 @@ void TrackTab::removeGoto(bool) {
 
 /*************************************************************************/
 
+void TrackTab::movePattern(bool isUp, int entryIndex) {
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new MovePatternCommand(pTrack, contextEventChannel, entryIndex, entryIndex + (isUp?-1:1));
+
+    cmd->setText(isUp ? "Move pattern Up" : "Move pattern Down");
+
+    // stop track as a pre step in cmd
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+
+    undoStack->push(cmd);
+
+    update();
+}
+
+/*************************************************************************/
+
 void TrackTab::movePatternUp(bool) {
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
-    if (entryIndex > 0) {
-        emit stopTrack();
-        pTrack->channelSequences[contextEventChannel].sequence.swap(entryIndex, entryIndex - 1);
-        pTrack->updateFirstNoteNumbers();
-        update();
-    }
+    if (entryIndex <= 0)
+        return;
+
+    movePattern(true, entryIndex);
 }
 
 /*************************************************************************/
 
 void TrackTab::movePatternDown(bool) {
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
-    if (entryIndex != pTrack->channelSequences[contextEventChannel].sequence.size() - 1) {
-        emit stopTrack();
-        pTrack->channelSequences[contextEventChannel].sequence.swap(entryIndex, entryIndex + 1);
-        pTrack->updateFirstNoteNumbers();
-        update();
-    }
+    if (entryIndex == pTrack->channelSequences[contextEventChannel].sequence.size() - 1)
+        return;
+
+    movePattern(false, entryIndex);
 }
 
 /*************************************************************************/
@@ -343,7 +357,9 @@ void TrackTab::insertPattern(bool doBefore) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
-    auto cmd = new InsertPatternCommand(pTrack, doBefore, patternIndex, contextEventChannel, contextEventNoteIndex, macro);
+    auto cmd = new InsertPatternCommand(pTrack, patternIndex, contextEventChannel, contextEventNoteIndex, 
+        pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex) + doBefore ? 0 : 1,
+        macro);
 
     auto upper_cmd = macro ? macro : cmd;
 

@@ -103,8 +103,21 @@ class InsertPatternCommand : public TrackCommand
     int iEntryIndex;
 
 public:
-    InsertPatternCommand(Track::Track* track, bool doBefore, int patternIndex, int channel, int noteIndex,
+    InsertPatternCommand(Track::Track* track, int patternIndex, int channel, int noteIndex, int entryIndex,
         QUndoCommand *parent = nullptr);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
+class MovePatternCommand : public TrackCommand
+{
+    int iChannel;
+    int iEntryIndexFrom;
+    int iEntryIndexTo;
+
+public:
+    MovePatternCommand(Track::Track* track, int channel, int entryIndexFrom, int entryIndexTo);
 
     void do_undo() final;
     void do_redo() final;

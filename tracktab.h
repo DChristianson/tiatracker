@@ -90,6 +90,7 @@ private:
     void addShortcut(QAction *action, QString actionName);
 
     void insertPattern(bool doBefore);
+    void movePattern(bool isUp, int entryIndex);
 
     Track::Track *pTrack = nullptr;
     TiaSound::PitchGuide *pPitchGuide;
