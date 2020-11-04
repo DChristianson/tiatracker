@@ -164,4 +164,17 @@ public:
     void do_redo() final;
 };
 
+class SetGotoCommand : public TrackCommand
+{
+    int iChannel;
+    int iEntryIndex;
+    int iNewGoto;
+    int iOldGoto;
+
+public:
+    SetGotoCommand(Track::Track* track, int channel, int entryIndex, int gotoTarget);
+
+    void do_undo() final;
+    void do_redo() final;
+};
 #endif // TRACKCOMMAND_H

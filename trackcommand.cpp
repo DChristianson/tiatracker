@@ -223,3 +223,32 @@ void RenamePatternCommand::do_redo()
 {
     pTrack->patterns[iPatternIndex].name = sNewPatternName;
 }
+
+// SetGotoCommand
+
+SetGotoCommand::SetGotoCommand(Track::Track* track, int channel, int entryIndex, int gotoTarget) :
+    TrackCommand(track, "", nullptr),
+    iChannel(channel),
+    iEntryIndex(entryIndex),
+    iNewGoto(gotoTarget),
+    iOldGoto(pTrack->channelSequences[iChannel].sequence[iEntryIndex].gotoTarget)
+{
+}
+
+void SetGotoCommand::do_undo()
+{
+    Track::SequenceEntry *entry = &(pTrack->channelSequences[iChannel].sequence[iEntryIndex]);
+
+    pTrack->lock();
+    entry->gotoTarget = iOldGoto;
+    pTrack->unlock();
+}
+
+void SetGotoCommand::do_redo()
+{
+    Track::SequenceEntry *entry = &(pTrack->channelSequences[iChannel].sequence[iEntryIndex]);
+
+    pTrack->lock();
+    entry->gotoTarget = iNewGoto;
+    pTrack->unlock();
+}

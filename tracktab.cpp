@@ -278,29 +278,51 @@ void TrackTab::renamePattern(bool) {
 /*************************************************************************/
 
 void TrackTab::setGoto(bool) {
+    emit stopTrack(); // do not remove because of modal dialog below 
     int maxValue = pTrack->channelSequences[contextEventChannel].sequence.size();
     SetGotoDialog dialog(this);
     dialog.setMaxValue(maxValue);
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
     Track::SequenceEntry *entry = &(pTrack->channelSequences[contextEventChannel].sequence[entryIndex]);
     dialog.setGotoValue(std::max(1, entry->gotoTarget + 1));
-    if (dialog.exec() == QDialog::Accepted) {
-        pTrack->lock();
-        entry->gotoTarget = dialog.getGotoValue() - 1;
-        pTrack->unlock();
-        update();
-    }
+    if (dialog.exec() != QDialog::Accepted)
+        return;
 
+    int gotoTarget = dialog.getGotoValue() - 1;
+    if (gotoTarget == entry->gotoTarget)
+        return;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetGotoCommand(pTrack, contextEventChannel, entryIndex, gotoTarget);
+
+    cmd->setText("Set Goto");
+
+    // no pre step in cmd
+
+    undoStack->push(cmd);
+
+    update();
 }
 
 /*************************************************************************/
 
 void TrackTab::removeGoto(bool) {
-    pTrack->lock();
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
     Track::SequenceEntry *entry = &(pTrack->channelSequences[contextEventChannel].sequence[entryIndex]);
-    entry->gotoTarget = -1;
-    pTrack->unlock();
+    if (entry->gotoTarget == -1)
+        return;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetGotoCommand(pTrack, contextEventChannel, entryIndex, -1);
+
+    cmd->setText("Remove Goto");
+
+    // no pre step in cmd
+
+    undoStack->push(cmd);
+
     update();
 }
 
