@@ -433,13 +433,6 @@ void TrackTab::insertPattern(bool doBefore) {
 
 /*************************************************************************/
 
-void TrackTab::copyEditPos(int pos)
-{
-    editPosCopy = pos;
-}
-
-/*************************************************************************/
-
 void TrackTab::removePattern(bool) {
     emit stopTrack(); // do not remove because of modal dialog(s) below
     if (pTrack->channelSequences[contextEventChannel].sequence.size() == 1) {
@@ -488,12 +481,14 @@ void TrackTab::removePattern(bool) {
 
     undoStack->push(cmd);
 
-    cmd->ci.editPosFrom = editPosCopy;
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    cmd->ci.editPosFrom = pe->getEditPos();
 
     emit validateEditPos();
 
     cmd->ci.selectedChannel = contextEventChannel;
-    cmd->ci.editPosTo = editPosCopy;
+    cmd->ci.editPosTo = pe->getEditPos();
 
     update();
 }
