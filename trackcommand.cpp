@@ -252,3 +252,27 @@ void SetGotoCommand::do_redo()
     entry->gotoTarget = iNewGoto;
     pTrack->unlock();
 }
+
+// SetStartPatternCommand
+
+SetStartPatternCommand::SetStartPatternCommand(Track::Track* track, int channel, int startPattern) :
+    TrackCommand(track, "", nullptr),
+    iChannel(channel),
+    iNewStartPattern(startPattern),
+    iOldStartPattern(pTrack->startPatterns[iChannel])
+{
+}
+
+void SetStartPatternCommand::do_undo()
+{
+    pTrack->lock();
+    pTrack->startPatterns[iChannel] = iOldStartPattern;
+    pTrack->unlock();
+}
+
+void SetStartPatternCommand::do_redo()
+{
+    pTrack->lock();
+    pTrack->startPatterns[iChannel] = iNewStartPattern;
+    pTrack->unlock();
+}

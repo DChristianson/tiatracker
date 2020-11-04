@@ -177,4 +177,19 @@ public:
     void do_undo() final;
     void do_redo() final;
 };
+
+class SetStartPatternCommand : public TrackCommand
+{
+    int iChannel;
+    int iNewStartPattern;
+    int iOldStartPattern;
+
+public:
+    SetStartPatternCommand(Track::Track* track, int channel, int startPattern);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
+
 #endif // TRACKCOMMAND_H

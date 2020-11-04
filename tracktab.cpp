@@ -245,9 +245,21 @@ void TrackTab::toggleLoop(bool) {
 /*************************************************************************/
 
 void TrackTab::setStartPattern(bool) {
-    pTrack->lock();
-    pTrack->startPatterns[contextEventChannel] = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
-    pTrack->unlock();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto startPattern = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new SetStartPatternCommand(pTrack, contextEventChannel, startPattern);
+
+    cmd->setText("Set start pattern");
+
+    // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    undoStack->push(cmd);
+
     update();
 }
 
@@ -269,6 +281,8 @@ void TrackTab::renamePattern(bool) {
     cmd->setText("Rename pattern");
 
     // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     undoStack->push(cmd);
 
@@ -299,6 +313,8 @@ void TrackTab::setGoto(bool) {
     cmd->setText("Set Goto");
 
     // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     undoStack->push(cmd);
 
@@ -320,6 +336,8 @@ void TrackTab::removeGoto(bool) {
     cmd->setText("Remove Goto");
 
     // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     undoStack->push(cmd);
 
@@ -338,6 +356,8 @@ void TrackTab::movePattern(bool isUp, int entryIndex) {
 
     // stop track as a pre step in cmd
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     undoStack->push(cmd);
 
