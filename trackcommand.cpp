@@ -202,3 +202,24 @@ void RemovePatternCommand::do_redo()
         }
     }
 }
+
+// RenamePatternCommand
+
+RenamePatternCommand::RenamePatternCommand(Track::Track* track, int patternIndex, const QString& patternName) :
+    TrackCommand(track, "", nullptr),
+    iPatternIndex(patternIndex),
+    sNewPatternName(patternName),
+    sOldPatternName(pTrack->patterns[patternIndex].name)
+{
+
+}
+
+void RenamePatternCommand::do_undo()
+{
+    pTrack->patterns[iPatternIndex].name = sOldPatternName;
+}
+
+void RenamePatternCommand::do_redo()
+{
+    pTrack->patterns[iPatternIndex].name = sNewPatternName;
+}

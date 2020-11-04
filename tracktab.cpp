@@ -254,14 +254,25 @@ void TrackTab::setStartPattern(bool) {
 /*************************************************************************/
 
 void TrackTab::renamePattern(bool) {
+    emit stopTrack(); // do not remove because of modal dialog below 
     RenamePatternDialog dialog(this);
     int entryIndex = pTrack->getSequenceEntryIndex(contextEventChannel, contextEventNoteIndex);
     int patternIndex = pTrack->channelSequences[contextEventChannel].sequence[entryIndex].patternIndex;
     dialog.setPatternName(pTrack->patterns[patternIndex].name);
-    if (dialog.exec() == QDialog::Accepted) {
-        pTrack->patterns[patternIndex].name = dialog.getPatternName();
-        update();
-    }
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new RenamePatternCommand(pTrack, patternIndex, dialog.getPatternName());
+
+    cmd->setText("Rename pattern");
+
+    // no pre step in cmd
+
+    undoStack->push(cmd);
+
+    update();
 }
 
 /*************************************************************************/

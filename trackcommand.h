@@ -151,4 +151,17 @@ public:
     void do_redo() final;
 };
 
+class RenamePatternCommand : public TrackCommand
+{
+    int iPatternIndex;
+    QString sNewPatternName;
+    QString sOldPatternName;
+
+public:
+    RenamePatternCommand(Track::Track* track, int patternIndex, const QString& patternName);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
 #endif // TRACKCOMMAND_H
