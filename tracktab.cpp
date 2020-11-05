@@ -569,7 +569,7 @@ void TrackTab::setSlideValue(bool) {
 /*************************************************************************/
 
 void TrackTab::setFrequency(bool) {
-    emit stopTrack();
+    emit stopTrack(); // do not remove because of modal dialog below
     Track::Note *selectedNote = pTrack->getNote(contextEventChannel, contextEventNoteIndex);
     if (selectedNote->type != Track::Note::instrumentType::Instrument) {
         MainWindow::displayMessage("Only a melodic instrument can have a frequency value!");
@@ -580,11 +580,28 @@ void TrackTab::setFrequency(bool) {
     Track::Instrument *ins = &(pTrack->instruments[selectedNote->instrumentNumber]);
     int maxFreq = ins->baseDistortion == TiaSound::Distortion::PURE_COMBINED ? 63 : 31;
     dialog.setMaxFrequencyValue(maxFreq);
-    if (dialog.exec() == QDialog::Accepted) {
-        selectedNote->value = dialog.getFrequencyValue();
-        emit advanceEditPos();
-        updatePatternEditor();
-    }
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new SetRowToInstrumentCommand(pTrack, patternIndex, noteIndex, selectedNote->instrumentNumber, dialog.getFrequencyValue());
+
+    cmd->setText("Set Frequency");
+
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    // hold gui stuffs in cmd:
+    cmd->ci.selectedChannel = contextEventChannel;
+    cmd->ci.editPosFrom = pe->getEditPos();
+    cmd->ci.editPosTo = pe->getEditPos() + 1;
+
+    undoStack->push(cmd); // post and redo methods are called here
+
+    updatePatternEditor();
 }
 
 /*************************************************************************/
