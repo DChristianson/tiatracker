@@ -12,12 +12,16 @@ SetRowToNoteCommand::SetRowToNoteCommand(Track::Track* track, int patternIndex, 
 
 void SetRowToNoteCommand::do_undo()
 {
+    pTrack->lock();
     pTrack->patterns[iPatternIndex].notes[iNoteIndex] = oldNote;
+    pTrack->unlock();
 }
 
 void SetRowToNoteCommand::do_redo()
 {
+    pTrack->lock();
     pTrack->patterns[iPatternIndex].notes[iNoteIndex] = newNote();
+    pTrack->unlock();
 }
 
 // SetRowToInstrumentCommand
