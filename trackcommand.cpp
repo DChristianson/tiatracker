@@ -49,6 +49,20 @@ Track::Note SetRowToPercussionCommand::newNote() const
     return { Track::Note::instrumentType::Percussion, iPercussionIndex, 0/*unused*/ };
 }
 
+// SetSlideValueCommand
+
+SetSlideValueCommand::SetSlideValueCommand(Track::Track* track, int patternIndex, int noteIndex, int slideValue) :
+    SetRowToNoteCommand(track, patternIndex, noteIndex),
+    iSlideValue(slideValue)
+{
+
+}
+
+Track::Note SetSlideValueCommand::newNote() const
+{
+    return { Track::Note::instrumentType::Slide, 0/*unused*/, iSlideValue };
+}
+
 // CreatePatternCommand
 
 CreatePatternCommand::CreatePatternCommand(Track::Track* track, const Track::Pattern& newPattern, QUndoCommand *parent) :

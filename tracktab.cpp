@@ -526,7 +526,7 @@ void TrackTab::duplicatePattern(bool) {
 /*************************************************************************/
 
 void TrackTab::setSlideValue(bool) {
-    emit stopTrack();
+    emit stopTrack();  // do not remove because of modal dialog below
     if (!pTrack->checkSlideValidity(contextEventChannel, contextEventNoteIndex)) {
         MainWindow::displayMessage("A SLIDE can only follow a melodic instrument or another slide!");
         return;
@@ -538,12 +538,32 @@ void TrackTab::setSlideValue(bool) {
     if (selectedNote->type == Track::Note::instrumentType::Slide) {
         dialog.setSlideValue(selectedNote->value);
     }
-    if (dialog.exec() == QDialog::Accepted) {
-        selectedNote->type = Track::Note::instrumentType::Slide;
-        selectedNote->value = dialog.getSlideValue();
-        emit advanceEditPos();
-        updatePatternEditor();
-    }
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+    
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new SetSlideValueCommand(pTrack, patternIndex, noteIndex, dialog.getSlideValue());
+
+    cmd->setText("Set Slide Value");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    // hold gui stuffs in cmd:
+    cmd->ci.selectedChannel = contextEventChannel;
+    cmd->ci.editPosFrom = pe->getEditPos();
+    cmd->ci.editPosTo = pe->getEditPos() + 1;
+
+    undoStack->push(cmd); // post and redo methods are called here
+
+    updatePatternEditor();
 }
 
 /*************************************************************************/

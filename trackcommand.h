@@ -83,6 +83,15 @@ public:
     Track::Note newNote() const final;
 };
 
+class SetSlideValueCommand : public SetRowToNoteCommand
+{
+    int iSlideValue;
+
+public:
+    SetSlideValueCommand(Track::Track* track, int patternIndex, int noteIndex, int slideValue);
+
+    Track::Note newNote() const final;
+};
 
 class CreatePatternCommand : public TrackCommand
 {
