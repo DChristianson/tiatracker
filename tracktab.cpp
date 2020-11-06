@@ -607,20 +607,56 @@ void TrackTab::setFrequency(bool) {
 /*************************************************************************/
 
 void TrackTab::setHold(bool) {
-    pTrack->lock();
-    pTrack->getNote(contextEventChannel, contextEventNoteIndex)->type = Track::Note::instrumentType::Hold;
-    pTrack->unlock();
-    emit advanceEditPos();
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new SetHoldCommand(pTrack, patternIndex, noteIndex);
+
+    cmd->setText("Set Hold");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    // hold gui stuffs in cmd:
+    cmd->ci.selectedChannel = contextEventChannel;
+    cmd->ci.editPosFrom = pe->getEditPos();
+    cmd->ci.editPosTo = pe->getEditPos() + 1;
+
+    undoStack->push(cmd); // post and redo methods are called here
+
     update();
 }
 
 /*************************************************************************/
 
 void TrackTab::setPause(bool) {
-    pTrack->lock();
-    pTrack->getNote(contextEventChannel, contextEventNoteIndex)->type = Track::Note::instrumentType::Pause;
-    pTrack->unlock();
-    emit advanceEditPos();
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new SetPauseCommand(pTrack, patternIndex, noteIndex);
+
+    cmd->setText("Set Pause");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    // hold gui stuffs in cmd:
+    cmd->ci.selectedChannel = contextEventChannel;
+    cmd->ci.editPosFrom = pe->getEditPos();
+    cmd->ci.editPosTo = pe->getEditPos() + 1;
+
+    undoStack->push(cmd); // post and redo methods are called here
+
     update();
 }
 

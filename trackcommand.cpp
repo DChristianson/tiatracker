@@ -67,6 +67,32 @@ Track::Note SetSlideValueCommand::newNote() const
     return { Track::Note::instrumentType::Slide, 0/*unused*/, iSlideValue };
 }
 
+// SetHoldCommand
+
+SetHoldCommand::SetHoldCommand(Track::Track* track, int patternIndex, int noteIndex) :
+    SetRowToNoteCommand(track, patternIndex, noteIndex)
+{
+
+}
+
+Track::Note SetHoldCommand::newNote() const
+{
+    return { Track::Note::instrumentType::Hold, 0/*unused*/, 0/*unused*/ };
+}
+
+// SetPauseCommand
+
+SetPauseCommand::SetPauseCommand(Track::Track* track, int patternIndex, int noteIndex) :
+    SetRowToNoteCommand(track, patternIndex, noteIndex)
+{
+
+}
+
+Track::Note SetPauseCommand::newNote() const
+{
+    return { Track::Note::instrumentType::Pause, 0/*unused*/, 0/*unused*/ };
+}
+
 // CreatePatternCommand
 
 CreatePatternCommand::CreatePatternCommand(Track::Track* track, const Track::Pattern& newPattern, QUndoCommand *parent) :

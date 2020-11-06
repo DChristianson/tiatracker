@@ -93,6 +93,22 @@ public:
     Track::Note newNote() const final;
 };
 
+class SetHoldCommand : public SetRowToNoteCommand
+{
+public:
+    SetHoldCommand(Track::Track* track, int patternIndex, int noteIndex);
+
+    Track::Note newNote() const final;
+};
+
+class SetPauseCommand : public SetRowToNoteCommand
+{
+public:
+    SetPauseCommand(Track::Track* track, int patternIndex, int noteIndex);
+
+    Track::Note newNote() const final;
+};
+
 class CreatePatternCommand : public TrackCommand
 {
     Track::Pattern pattern;
