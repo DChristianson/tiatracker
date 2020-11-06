@@ -320,3 +320,48 @@ void SetStartPatternCommand::do_redo()
     pTrack->startPatterns[iChannel] = iNewStartPattern;
     pTrack->unlock();
 }
+
+// DeleteRowCommand
+
+DeleteRowCommand::DeleteRowCommand(Track::Track* track, int patternIndex, int noteIndex) :
+    TrackCommand(track, "", nullptr),
+    iPatternIndex(patternIndex),
+    iNoteIndex(noteIndex),
+    oldNote(track->patterns[patternIndex].notes[noteIndex])
+{
+}
+
+void DeleteRowCommand::do_undo()
+{
+    pTrack->patterns[iPatternIndex].notes.insert(iNoteIndex, oldNote);
+    pTrack->updateFirstNoteNumbers();
+}
+
+void DeleteRowCommand::do_redo()
+{
+    pTrack->patterns[iPatternIndex].notes.removeAt(iNoteIndex);
+    pTrack->updateFirstNoteNumbers();
+}
+
+// InsertRowCommand
+
+InsertRowCommand::InsertRowCommand(Track::Track* track, int patternIndex, int noteIndex) :
+    TrackCommand(track, "", nullptr),
+    iPatternIndex(patternIndex),
+    iNoteIndex(noteIndex)
+{
+}
+
+void InsertRowCommand::do_undo()
+{
+    pTrack->patterns[iPatternIndex].notes.removeAt(iNoteIndex);
+    pTrack->updateFirstNoteNumbers();
+}
+
+void InsertRowCommand::do_redo()
+{
+    Track::Note newNote(Track::Note::instrumentType::Hold, 0/*unused*/, 0/*unused*/);
+    pTrack->patterns[iPatternIndex].notes.insert(iNoteIndex, newNote);
+    pTrack->updateFirstNoteNumbers();
+}
+

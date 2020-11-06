@@ -216,5 +216,29 @@ public:
     void do_redo() final;
 };
 
+class DeleteRowCommand : public TrackCommand
+{
+    int iPatternIndex;
+    int iNoteIndex;
+    Track::Note oldNote;
+
+public:
+    DeleteRowCommand(Track::Track* track, int patternIndex, int noteIndex);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
+class InsertRowCommand : public TrackCommand
+{
+    int iPatternIndex;
+    int iNoteIndex;
+
+public:
+    InsertRowCommand(Track::Track* track, int patternIndex, int noteIndex);
+
+    void do_undo() final;
+    void do_redo() final;
+};
 
 #endif // TRACKCOMMAND_H

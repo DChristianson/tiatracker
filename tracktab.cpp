@@ -663,54 +663,90 @@ void TrackTab::setPause(bool) {
 /*************************************************************************/
 
 void TrackTab::deleteRow(bool) {
-    emit stopTrack();
+    emit stopTrack(); // do not remove because of modal dialog below
     int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
-    Track::Pattern *pattern = &(pTrack->patterns[patternIndex]);
-    if (pattern->notes.size() == Track::Pattern::minSize) {
+    if (pTrack->patterns[patternIndex].notes.size() == Track::Pattern::minSize) {
         MainWindow::displayMessage("Pattern is already at minimum size!");
         return;
     }
 
-    int noteInPattern = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
-    pattern->notes.removeAt(noteInPattern);
-    pTrack->updateFirstNoteNumbers();
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new DeleteRowCommand(pTrack, patternIndex, noteIndex);
+
+    cmd->setText("Delete Row");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+   
+    undoStack->push(cmd); // post and redo methods are called here
+
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    cmd->ci.editPosFrom = pe->getEditPos();
+
     emit validateEditPos();
+
+    cmd->ci.selectedChannel = contextEventChannel;
+    cmd->ci.editPosTo = pe->getEditPos();
+
     update();
 }
 
 /*************************************************************************/
 
 void TrackTab::insertRowBefore(bool) {
-    emit stopTrack();
+    emit stopTrack(); // do not remove because of modal dialog below
     int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
-    Track::Pattern *pattern = &(pTrack->patterns[patternIndex]);
-    if (pattern->notes.size() == Track::Pattern::maxSize) {
+    if (pTrack->patterns[patternIndex].notes.size() == Track::Pattern::maxSize) {
         MainWindow::displayMessage("Pattern is already at maximum size!");
         return;
     }
 
-    int noteInPattern = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
-    Track::Note newNote(Track::Note::instrumentType::Hold, 0, 0);
-    pattern->notes.insert(noteInPattern, newNote);
-    pTrack->updateFirstNoteNumbers();
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
+
+    auto cmd = new InsertRowCommand(pTrack, patternIndex, noteIndex);
+
+    cmd->setText("Insert Row (before)");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    undoStack->push(cmd); // post and redo methods are called here
+
     update();
 }
 
 /*************************************************************************/
 
 void TrackTab::insertRowAfter(bool) {
-    emit stopTrack();
+    emit stopTrack(); // do not remove because of modal dialog below
     int patternIndex = pTrack->getPatternIndex(contextEventChannel, contextEventNoteIndex);
-    Track::Pattern *pattern = &(pTrack->patterns[patternIndex]);
-    if (pattern->notes.size() == Track::Pattern::maxSize) {
+    if (pTrack->patterns[patternIndex].notes.size() == Track::Pattern::maxSize) {
         MainWindow::displayMessage("Pattern is already at maximum size!");
         return;
     }
 
-    int noteInPattern = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex);
-    Track::Note newNote(Track::Note::instrumentType::Hold, 0, 0);
-    pattern->notes.insert(noteInPattern + 1, newNote);
-    pTrack->updateFirstNoteNumbers();
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    int noteIndex = pTrack->getNoteIndexInPattern(contextEventChannel, contextEventNoteIndex)+1;
+
+    auto cmd = new InsertRowCommand(pTrack, patternIndex, noteIndex);
+
+    cmd->setText("Insert Row (after)");
+
+    // stop track as a pre step in cmd, update tab update as a post step
+    cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    undoStack->push(cmd); // post and redo methods are called here
+
     update();
 }
 
