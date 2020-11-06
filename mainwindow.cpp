@@ -97,6 +97,10 @@ MainWindow::MainWindow(QWidget *parent) :
     pStopTrack->setObjectName("StopTrack");
     pTrackTabUpdate = new UndoStep(this);
     pTrackTabUpdate->setObjectName("TrackTabUpdate");
+
+    ui->spinBoxRowsPerBeat->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxEvenTempo->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxOddTempo->findChild<QLineEdit*>()->setReadOnly(true);
 }
 
 /*************************************************************************/
@@ -253,8 +257,12 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
             ui->trackEditor->setEditPos(editPos);
         }
     }
+    else if (ci.patternEditor)
+        ui->trackEditor->update();
 
-    if (ci.stats)
+    if (ci.trackTab)
+        ui->tabTrack->updateTrackTab();
+    else if (ci.trackStats)
         ui->tabTrack->updateTrackStats();
 }
 

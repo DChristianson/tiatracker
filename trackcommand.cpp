@@ -365,3 +365,27 @@ void InsertRowCommand::do_redo()
     pTrack->updateFirstNoteNumbers();
 }
 
+// SetPatternSpeedCommand
+
+SetPatternSpeedCommand::SetPatternSpeedCommand(Track::Track* track, int patternIndex, bool even, int speed) :
+    TrackCommand(track, "", nullptr),
+    iPatternIndex(patternIndex),
+    bEven(even),
+    newSpeed(speed),
+    oldSpeed(even ? pTrack->patterns[patternIndex].evenSpeed : pTrack->patterns[patternIndex].oddSpeed)
+{
+}
+
+void SetPatternSpeedCommand::do_undo()
+{
+    int& speed = bEven ? pTrack->patterns[iPatternIndex].evenSpeed : pTrack->patterns[iPatternIndex].oddSpeed;
+
+    speed = oldSpeed;
+}
+
+void SetPatternSpeedCommand::do_redo()
+{
+    int& speed = bEven ? pTrack->patterns[iPatternIndex].evenSpeed : pTrack->patterns[iPatternIndex].oddSpeed;
+
+    speed = newSpeed;
+}

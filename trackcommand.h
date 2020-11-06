@@ -241,4 +241,37 @@ public:
     void do_redo() final;
 };
 
+template<typename T>
+class SetValueCommand : public TrackCommand
+{
+    T& value;
+    T  oldValue;
+    T  newValue;
+public:
+    SetValueCommand(Track::Track* track, T& v, T newV) :
+        TrackCommand(track, "", nullptr),
+        value(v),
+        oldValue(v),
+        newValue(newV)
+    {
+    }
+
+    void do_undo() { value = oldValue; }
+    void do_redo() { value = newValue; }
+};
+
+class SetPatternSpeedCommand : public TrackCommand
+{
+    int iPatternIndex;
+    bool bEven;
+    int newSpeed;
+    int oldSpeed;
+
+public:
+    SetPatternSpeedCommand(Track::Track* track, int patternIndex, bool even, int speed);
+
+    void do_undo() final;
+    void do_redo() final;
+};
+
 #endif // TRACKCOMMAND_H

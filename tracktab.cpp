@@ -159,9 +159,13 @@ void TrackTab::initTrackTab() {
 void TrackTab::updateTrackTab() {
     // Set GUI elements
     QCheckBox *cbGlobal = findChild<QCheckBox *>("checkBoxGlobalTempo");
+    cbGlobal->blockSignals(true);
     cbGlobal->setChecked(pTrack->globalSpeed);
+    cbGlobal->blockSignals(false);
     QSpinBox *spEven = findChild<QSpinBox *>("spinBoxEvenTempo");
+    spEven->blockSignals(true);
     QSpinBox *spOdd = findChild<QSpinBox *>("spinBoxOddTempo");
+    spOdd->blockSignals(true);
     if (pTrack->globalSpeed) {
         spEven->setValue(pTrack->evenSpeed);
         spOdd->setValue(pTrack->oddSpeed);
@@ -174,8 +178,12 @@ void TrackTab::updateTrackTab() {
             spOdd->setValue(pTrack->patterns[patternIndex].oddSpeed);
         }
     }
+    spEven->blockSignals(false);
+    spOdd->blockSignals(false);
     QSpinBox *spRowsPerBeat = findChild<QSpinBox *>("spinBoxRowsPerBeat");
+    spRowsPerBeat->blockSignals(true);
     spRowsPerBeat->setValue(pTrack->rowsPerBeat);
+    spRowsPerBeat->blockSignals(false);
 
     // Update individual sub-widgets
     updateTrackStats();
@@ -184,41 +192,79 @@ void TrackTab::updateTrackTab() {
 /*************************************************************************/
 
 void TrackTab::toggleGlobalTempo(bool toggled) {
-    pTrack->globalSpeed = toggled;
-    updateTrackTab();
-    updateTrackStats();
-    updatePatternEditor();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetValueCommand<bool>(pTrack, pTrack->globalSpeed, toggled);
+
+    cmd->setText("Set global speed");
+
+    // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    cmd->ci.trackTab = true;
+    cmd->ci.patternEditor = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
 
 void TrackTab::setEvenSpeed(int value) {
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    TrackCommand* cmd;
     if (pTrack->globalSpeed) {
-        pTrack->evenSpeed = value;
+        cmd = new SetValueCommand<int>(pTrack, pTrack->evenSpeed, value);
     } else {
         PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
         int editPos = pe->getEditPos();
         // Only the left channel is used for local tempo
         int patternIndex = pTrack->getPatternIndex(0, editPos);
-        pTrack->patterns[patternIndex].evenSpeed = value;
+        cmd = new SetPatternSpeedCommand(pTrack, patternIndex, true, value);
     }
-    updateTrackStats();
-    updatePatternEditor();
+
+    cmd->setText("Set even speed");
+
+    // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    cmd->ci.trackTab = true;
+    cmd->ci.patternEditor = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
 
 void TrackTab::setOddSpeed(int value) {
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    TrackCommand* cmd;
     if (pTrack->globalSpeed) {
-        pTrack->oddSpeed = value;
+        cmd = new SetValueCommand<int>(pTrack, pTrack->oddSpeed, value);
     } else {
         PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
         int editPos = pe->getEditPos();
         int patternIndex = pTrack->getPatternIndex(0, editPos);
         pTrack->patterns[patternIndex].oddSpeed = value;
+        cmd = new SetPatternSpeedCommand(pTrack, patternIndex, false, value);
     }
-    updateTrackStats();
-    updatePatternEditor();
+
+    cmd->setText("Set odd speed");
+
+    // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    cmd->ci.trackTab = true;
+    cmd->ci.patternEditor = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
@@ -424,7 +470,7 @@ void TrackTab::insertPattern(bool doBefore) {
     upper_cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     // hold gui stuffs in the uppest command:
-    upper_cmd->ci.stats = true;
+    upper_cmd->ci.trackStats = true;
 
     undoStack->push(upper_cmd); // pre, post and redo methods are called here
 
@@ -477,7 +523,7 @@ void TrackTab::removePattern(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     // hold gui stuffs in the command:
-    cmd->ci.stats = true;
+    cmd->ci.trackStats = true;
 
     undoStack->push(cmd);
 
@@ -516,7 +562,7 @@ void TrackTab::duplicatePattern(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
 
     // hold gui stuffs in the command:
-    cmd->ci.stats = true;
+    cmd->ci.trackStats = true;
 
     undoStack->push(cmd);
 

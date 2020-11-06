@@ -7,7 +7,9 @@ struct commandInfo {
     int selectedChannel = -1;
     int editPosFrom = -1;
     int editPosTo = -1;
-    bool stats = false;
+    bool trackStats = false;
+    bool trackTab = false;
+    bool patternEditor = false;
 };
 
 class UndoStep : public QObject

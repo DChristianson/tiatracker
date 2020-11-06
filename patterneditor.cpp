@@ -120,8 +120,21 @@ void PatternEditor::advanceEditPos() {
 /*************************************************************************/
 
 void PatternEditor::setRowsPerBeat(int value) {
-    pTrack->rowsPerBeat = value;
-    update();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetValueCommand<int>(pTrack, pTrack->rowsPerBeat, value);
+
+    cmd->setText("Set rows per beat");
+
+    // no pre step in cmd
+    // always post step for status bar update
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    cmd->ci.trackTab = true;
+    cmd->ci.patternEditor = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
