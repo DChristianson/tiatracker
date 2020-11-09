@@ -264,6 +264,9 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
         ui->tabTrack->updateTrackTab();
     else if (ci.trackStats)
         ui->tabTrack->updateTrackStats();
+
+    if (ci.optionsTab)
+        ui->tabOptions->updateOptionsTab();
 }
 
 /*************************************************************************/
@@ -1604,7 +1607,7 @@ void MainWindow::on_actionExport_complete_player_to_dasm_triggered() {
     }
     frameworkString.replace("%%AUTHOR%%", pTrack->metaAuthor);
     frameworkString.replace("%%NAME%%", pTrack->metaName);
-    if (pTrack->getTvMode() == TiaSound::TvStandard::PAL) {
+    if (pTrack->tvMode == TiaSound::TvStandard::PAL) {
         frameworkString.replace("%%PAL%%", "1");
         frameworkString.replace("%%NTSC%%", "0");
     } else {
@@ -1916,7 +1919,7 @@ void MainWindow::on_actionExport_complete_player_to_MADS_triggered() {
     }
     frameworkString.replace("%%AUTHOR%%", pTrack->metaAuthor);
     frameworkString.replace("%%NAME%%", pTrack->metaName);
-    if (pTrack->getTvMode() == TiaSound::TvStandard::PAL) {
+    if (pTrack->tvMode == TiaSound::TvStandard::PAL) {
         frameworkString.replace("%%PAL%%", "1");
         frameworkString.replace("%%NTSC%%", "0");
     } else {
@@ -2005,7 +2008,7 @@ void MainWindow::on_actionExport_complete_player_to_k65_triggered() {
     }
     frameworkString.replace("%%AUTHOR%%", pTrack->metaAuthor);
     frameworkString.replace("%%NAME%%", pTrack->metaName);
-    if (pTrack->getTvMode() == TiaSound::TvStandard::PAL) {
+    if (pTrack->tvMode == TiaSound::TvStandard::PAL) {
         frameworkString.replace("%%PAL%%", "1");
         frameworkString.replace("%%NTSC%%", "0");
     } else {

@@ -10,6 +10,7 @@ struct commandInfo {
     bool trackStats = false;
     bool trackTab = false;
     bool patternEditor = false;
+    bool optionsTab = false;
 };
 
 class UndoStep : public QObject

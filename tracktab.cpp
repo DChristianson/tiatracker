@@ -828,7 +828,7 @@ void TrackTab::updateTrackStats() {
     long numOddTicks = int((numRows + 1)/2)*pTrack->oddSpeed;
     long numEvenTicks = int(numRows/2)*pTrack->evenSpeed;
     long numTicks = numOddTicks + numEvenTicks;
-    int ticksPerSecond = pTrack->getTvMode() == TiaSound::TvStandard::PAL ? 50 : 60;
+    int ticksPerSecond = pTrack->tvMode == TiaSound::TvStandard::PAL ? 50 : 60;
     int minutes = numTicks/(ticksPerSecond*60);
     int seconds = (numTicks%(ticksPerSecond*60))/ticksPerSecond;
     QString timeText = QString::number(minutes);

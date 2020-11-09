@@ -667,16 +667,4 @@ bool Track::fromJson(const QJsonObject &json) {
     return true;
 }
 
-/*************************************************************************/
-
-TiaSound::TvStandard Track::getTvMode() const {
-    return tvMode;
-}
-
-/*************************************************************************/
-
-void Track::setTvMode(const TiaSound::TvStandard &value) {
-    tvMode = value;
-}
-
 }

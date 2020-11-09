@@ -55,8 +55,10 @@ void OptionsTab::initOptionsTab() {
 void OptionsTab::updateOptionsTab() {
     // TvStandard
     QRadioButton *rbPal = findChild<QRadioButton *>("radioButtonPal");
+    rbPal->blockSignals(true);
     QRadioButton *rbNtsc = findChild<QRadioButton *>("radioButtonNtsc");
-    if (pTrack->getTvMode() == TiaSound::TvStandard::PAL) {
+    rbNtsc->blockSignals(true);
+    if (pTrack->tvMode == TiaSound::TvStandard::PAL) {
         rbPal->setChecked(true);
         rbNtsc->setChecked(false);
         emit setTVStandard(static_cast<int>(TiaSound::TvStandard::PAL));
@@ -65,15 +67,21 @@ void OptionsTab::updateOptionsTab() {
         rbNtsc->setChecked(true);
         emit setTVStandard(static_cast<int>(TiaSound::TvStandard::NTSC));
     }
+    rbPal->blockSignals(false);
+    rbNtsc->blockSignals(false);
     // Meta data
     QLineEdit *leAuthor = findChild<QLineEdit *>("lineEditAuthor");
+    leAuthor->blockSignals(true);
     leAuthor->setText(pTrack->metaAuthor);
-    leAuthor->update();
+    leAuthor->blockSignals(false);
     QLineEdit *leSongName = findChild<QLineEdit *>("lineEditSongName");
+    leSongName->blockSignals(true);
     leSongName->setText(pTrack->metaName);
-    leAuthor->update();
+    leSongName->blockSignals(false);
     QPlainTextEdit *te = findChild<QPlainTextEdit *>("plainTextEditComment");
+    te->blockSignals(true);
     te->setPlainText(pTrack->metaComment);
+    te->blockSignals(false);
 
     // Pitch guide
     QLabel *infoLabel = findChild<QLabel *>("labelGuideInfo");
@@ -81,7 +89,6 @@ void OptionsTab::updateOptionsTab() {
     TiaSound::PitchGuide *pg = &(guides[cbGuides->currentIndex()]);
     QString tvText = (pg->tvStandard == TiaSound::TvStandard::PAL ? "PAL" : "NTSC");
     infoLabel->setText("(" + tvText + ", " + QString::number(pg->baseFreq) + "Hz)");
-    update();
 }
 
 /*************************************************************************/
@@ -100,15 +107,20 @@ void OptionsTab::on_comboBoxPitchGuide_currentIndexChanged(int index) {
 /*************************************************************************/
 
 void OptionsTab::on_radioButtonPal_toggled(bool checked) {
-    if (checked) {
-        // Set to PAL
-        pTrack->setTvMode(TiaSound::TvStandard::PAL);
-        emit setTVStandard(static_cast<int>(TiaSound::TvStandard::PAL));
-    } else {
-        // Set to NTSC
-        pTrack->setTvMode(TiaSound::TvStandard::NTSC);
-        emit setTVStandard(static_cast<int>(TiaSound::TvStandard::NTSC));
-    }
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto tvMode = checked ? TiaSound::TvStandard::PAL : TiaSound::TvStandard::NTSC;
+
+    auto cmd = new SetValueCommand<TiaSound::TvStandard>(pTrack, pTrack->tvMode, tvMode);
+
+    cmd->setText(checked ? "Set TV Standard to PAL" : "Set TV Standard to NTSC");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    
+    cmd->ci.optionsTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/

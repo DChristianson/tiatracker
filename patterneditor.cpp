@@ -415,7 +415,7 @@ void PatternEditor::drawGoto(int channel, int yPos, Track::Pattern *curPattern, 
 void PatternEditor::drawTimestamp(int row, QPainter *painter, int yPos, int channel)
 {
     if (pTrack->globalSpeed) {
-        int ticksPerSecond = pTrack->getTvMode() == TiaSound::TvStandard::PAL ? 50 : 60;
+        int ticksPerSecond = pTrack->tvMode == TiaSound::TvStandard::PAL ? 50 : 60;
         long numOddTicks = int((row + 1)/2)*pTrack->oddSpeed;
         long numEvenTicks = int(row/2)*pTrack->evenSpeed;
         long numTick = numOddTicks + numEvenTicks;

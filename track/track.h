@@ -99,9 +99,6 @@ public:
     void toJson(QJsonObject &json);
     bool fromJson(const QJsonObject &json);
 
-    TiaSound::TvStandard getTvMode() const;
-    void setTvMode(const TiaSound::TvStandard &value);
-
     QString name{"new track.ttt"};
     QList<Instrument> instruments{
         {"---"}, {"---"}, {"---"}, {"---"}, {"---"}, {"---"}, {"---"}
@@ -128,10 +125,10 @@ public:
     QString metaName;
     QString metaComment;
 
+    TiaSound::TvStandard tvMode = TiaSound::TvStandard::PAL;
+
 private:
     QMutex mutex;
-
-    TiaSound::TvStandard tvMode = TiaSound::TvStandard::PAL;
 };
 
 }
