@@ -244,11 +244,12 @@ public:
 template<typename T>
 class SetValueCommand : public TrackCommand
 {
+protected:
     T& value;
     T  oldValue;
     T  newValue;
 public:
-    SetValueCommand(Track::Track* track, T& v, T newV) :
+    SetValueCommand(Track::Track* track, T& v, const T newV) :
         TrackCommand(track, "", nullptr),
         value(v),
         oldValue(v),
@@ -256,8 +257,33 @@ public:
     {
     }
 
-    void do_undo() { value = oldValue; }
-    void do_redo() { value = newValue; }
+    void do_undo() final { value = oldValue; }
+    void do_redo() final { value = newValue; }
+};
+
+class SetStringCommand : public SetValueCommand<QString>
+{
+    int _id;
+    static bool ID;
+public:
+    SetStringCommand(Track::Track* track, QString& v, const QString newV):
+        SetValueCommand<QString>(track, v, newV) { _id = int(ID); }
+
+    int id() const final { return _id; }
+
+    bool mergeWith(const QUndoCommand *other) final
+    {
+        if (other->id() != id())
+            return false;
+        auto other_like_me = dynamic_cast<const SetStringCommand*>(other);
+        assert(other_like_me != nullptr);
+        if (&value != &other_like_me->value)
+            return false; // target mismatch
+        newValue = other_like_me->newValue;
+        return true; // other will be deleted
+    }
+
+    static void ToggleID() { ID = !ID; }
 };
 
 class SetPatternSpeedCommand : public TrackCommand

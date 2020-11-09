@@ -232,18 +232,58 @@ void OptionsTab::on_pushButtonGuideExport_clicked(bool) {
 /*************************************************************************/
 
 void OptionsTab::on_lineEditAuthor_textChanged(const QString newText) {
-    pTrack->metaAuthor = newText;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetStringCommand(pTrack, pTrack->metaAuthor, newText);
+
+    cmd->setText("Set Author");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    undoStack->push(cmd);
+
+    cmd->ci.optionsTab = true;
 }
 
 /*************************************************************************/
 
 void OptionsTab::on_lineEditSongName_textChanged(const QString newText) {
-    pTrack->metaName = newText;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetStringCommand(pTrack, pTrack->metaName, newText);
+
+    cmd->setText("Set Song name");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    undoStack->push(cmd);
+
+    cmd->ci.optionsTab = true;
 }
 
 /*************************************************************************/
 
 void OptionsTab::on_plainTextEditComment_textChanged() {
     QPlainTextEdit *te = findChild<QPlainTextEdit *>("plainTextEditComment");
-    pTrack->metaComment = te->document()->toPlainText();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetStringCommand(pTrack, pTrack->metaComment, te->document()->toPlainText());
+
+    cmd->setText("Set Song name");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    undoStack->push(cmd);
+
+    cmd->ci.optionsTab = true;
+}
+
+/*************************************************************************/
+
+void OptionsTab::on_text_editingFinished()
+{
+    SetStringCommand::ToggleID();
 }

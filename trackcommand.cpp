@@ -365,6 +365,10 @@ void InsertRowCommand::do_redo()
     pTrack->updateFirstNoteNumbers();
 }
 
+// SetStringCommand
+
+bool SetStringCommand::ID = true;
+
 // SetPatternSpeedCommand
 
 SetPatternSpeedCommand::SetPatternSpeedCommand(Track::Track* track, int patternIndex, bool even, int speed) :
