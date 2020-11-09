@@ -101,7 +101,7 @@ void PatternEditor::setEditPos(int newPos) {
 /*************************************************************************/
 
 void PatternEditor::setEditPos(int newChannel, int newPos) {
-    selectedChannel = newChannel;
+    setSelectedChannel(newChannel);
     setEditPos(newPos);
 }
 
@@ -115,6 +115,14 @@ void PatternEditor::validateEditPos() {
 
 void PatternEditor::advanceEditPos() {
     setEditPos(editPos + 1);
+}
+
+/*************************************************************************/
+
+void PatternEditor::setSelectedChannel(int newChannel)
+{
+    selectedChannel = newChannel;
+    emit editChannelChanged(selectedChannel);
 }
 
 /*************************************************************************/
@@ -227,25 +235,22 @@ void PatternEditor::moveDown(bool) {
 /*************************************************************************/
 
 void PatternEditor::moveLeft(bool) {
-    selectedChannel = 0;
-    setEditPos(editPos);
-    emit editChannelChanged(selectedChannel);
+    setSelectedChannel(0);
+    setEditPos(editPos);   
 }
 
 /*************************************************************************/
 
 void PatternEditor::moveRight(bool) {
-    selectedChannel = 1;
+    setSelectedChannel(1);
     setEditPos(editPos);
-    emit editChannelChanged(selectedChannel);
 }
 
 /*************************************************************************/
 
 void PatternEditor::switchChannel(bool) {
-    selectedChannel = 1 - selectedChannel;
+    setSelectedChannel(1 - selectedChannel);
     setEditPos(editPos);
-    emit editChannelChanged(selectedChannel);
 }
 
 /*************************************************************************/
@@ -547,9 +552,8 @@ void PatternEditor::mousePressEvent(QMouseEvent *event) {
     if (!clickedInValidRow(event->x(), event->y(), &channel, &noteIndex)) {
         return;
     }
-    selectedChannel = channel;
+    setSelectedChannel(channel);
     setEditPos(noteIndex);
-    emit editChannelChanged(selectedChannel);
 }
 
 /*************************************************************************/

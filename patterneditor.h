@@ -59,6 +59,7 @@ public slots:
 
     void setEditPos(int newPos);
     void setEditPos(int newChannel, int newPos);
+    void setSelectedChannel(int newChannel);
 
     void validateEditPos();
     void advanceEditPos();
