@@ -123,7 +123,7 @@ void OptionsTab::on_comboBoxPitchGuide_currentIndexChanged(int index) {
     new SetValueCommand<double>(pTrack, pTrack->guideBaseFreq, pg.baseFreq, cmd);
     new SetValueCommand<TiaSound::TvStandard>(pTrack, pTrack->guideTvStandard, pg.tvStandard, cmd);
 
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.optionsTab = true;
 
@@ -142,7 +142,7 @@ void OptionsTab::on_radioButtonPal_toggled(bool checked) {
 
     cmd->setText(checked ? "Set TV Standard to PAL" : "Set TV Standard to NTSC");
 
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
     
     cmd->ci.optionsTab = true;
 
@@ -265,7 +265,7 @@ void OptionsTab::on_lineEditAuthor_textChanged(const QString newText) {
 
     cmd->setText("Set Author");
 
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -282,7 +282,7 @@ void OptionsTab::on_lineEditSongName_textChanged(const QString newText) {
 
     cmd->setText("Set Song name");
 
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -300,7 +300,7 @@ void OptionsTab::on_plainTextEditComment_textChanged() {
 
     cmd->setText("Set Song name");
 
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 

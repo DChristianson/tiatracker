@@ -204,7 +204,7 @@ private:
 
     QUndoStack *pUndoStack = nullptr;
     UndoStep* pStopTrack = nullptr;
-    UndoStep* pTrackTabUpdate = nullptr;
+    UndoStep* pTabsUpdate = nullptr;
 };
 
 #endif // MAINWINDOW_H

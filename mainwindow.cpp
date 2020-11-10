@@ -95,8 +95,8 @@ MainWindow::MainWindow(QWidget *parent) :
     pUndoStack->setObjectName("UndoStack");
     pStopTrack = new UndoStep(this);
     pStopTrack->setObjectName("StopTrack");
-    pTrackTabUpdate = new UndoStep(this);
-    pTrackTabUpdate->setObjectName("TrackTabUpdate");
+    pTabsUpdate = new UndoStep(this);
+    pTabsUpdate->setObjectName("TabsUpdate");
 
     ui->spinBoxRowsPerBeat->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxEvenTempo->findChild<QLineEdit*>()->setReadOnly(true);
@@ -147,7 +147,7 @@ void MainWindow::initConnections() {
     actionUndo->setShortcuts(QKeySequence::Undo);
     actionRedo->setShortcuts(QKeySequence::Redo);
     QObject::connect(pStopTrack, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SIGNAL(stopTrack()));
-    QObject::connect(pTrackTabUpdate, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SLOT(updateWithCommandInfos(bool, const QString&, const commandInfo&)));
+    QObject::connect(pTabsUpdate, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SLOT(updateWithCommandInfos(bool, const QString&, const commandInfo&)));
     QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(update()));
     QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(update()));
     statusBar()->showMessage("");

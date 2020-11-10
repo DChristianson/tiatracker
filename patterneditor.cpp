@@ -138,7 +138,7 @@ void PatternEditor::setRowsPerBeat(int value) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
     cmd->ci.patternEditor = true;
@@ -165,7 +165,7 @@ void PatternEditor::setRowToInstrument(int frequency) {
     }
 
     // update tab update as a post step
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->setText(constructRowString(noteIndex, cmd->newNote()));
 

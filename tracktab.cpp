@@ -194,7 +194,7 @@ void TrackTab::toggleGlobalTempo(bool toggled) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
     cmd->ci.patternEditor = true;
@@ -223,7 +223,7 @@ void TrackTab::setEvenSpeed(int value) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
     cmd->ci.patternEditor = true;
@@ -252,7 +252,7 @@ void TrackTab::setOddSpeed(int value) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
     cmd->ci.patternEditor = true;
@@ -295,7 +295,7 @@ void TrackTab::setStartPattern(bool) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -321,7 +321,7 @@ void TrackTab::renamePattern(bool) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -353,7 +353,7 @@ void TrackTab::setGoto(bool) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -376,7 +376,7 @@ void TrackTab::removeGoto(bool) {
 
     // no pre step in cmd
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -396,7 +396,7 @@ void TrackTab::movePattern(bool isUp, int entryIndex) {
     // stop track as a pre step in cmd
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
     // always post step for status bar update
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
 
@@ -460,7 +460,7 @@ void TrackTab::insertPattern(bool doBefore) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     upper_cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    upper_cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    upper_cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     // hold gui stuffs in the uppest command:
     upper_cmd->ci.trackStats = true;
@@ -513,7 +513,7 @@ void TrackTab::removePattern(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     // hold gui stuffs in the command:
     cmd->ci.trackStats = true;
@@ -552,7 +552,7 @@ void TrackTab::duplicatePattern(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     // hold gui stuffs in the command:
     cmd->ci.trackStats = true;
@@ -591,7 +591,7 @@ void TrackTab::setSlideValue(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
@@ -657,7 +657,7 @@ void TrackTab::setHold(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
@@ -685,7 +685,7 @@ void TrackTab::setPause(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
@@ -719,7 +719,7 @@ void TrackTab::deleteRow(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
    
     undoStack->push(cmd); // post and redo methods are called here
 
@@ -755,7 +755,7 @@ void TrackTab::insertRowBefore(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd); // post and redo methods are called here
 
@@ -782,7 +782,7 @@ void TrackTab::insertRowAfter(bool) {
 
     // stop track as a pre step in cmd, update tab update as a post step
     cmd->pre = this->window()->findChild<UndoStep*>("StopTrack");
-    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd); // post and redo methods are called here
 
