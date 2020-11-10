@@ -78,9 +78,6 @@ public slots:
     void invalidNoteFound(int channel, int entryIndex, int noteIndex, QString reason);
 
 private:
-    /* Updates the pattern editor area */
-    void updatePatternEditor();
-
     /* Lets the user select a pattern to insert. Returns index of
      * Pattern, or patterns.size() if create new was pressed,
      * or -1 if cancel was pressed. */

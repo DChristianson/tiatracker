@@ -148,8 +148,6 @@ void MainWindow::initConnections() {
     actionRedo->setShortcuts(QKeySequence::Redo);
     QObject::connect(pStopTrack, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SIGNAL(stopTrack()));
     QObject::connect(pTabsUpdate, SIGNAL(step(bool, const QString&, const commandInfo&)), this, SLOT(updateWithCommandInfos(bool, const QString&, const commandInfo&)));
-    QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(update()));
-    QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(update()));
     statusBar()->showMessage("");
 
     // Shaper context menu
@@ -261,8 +259,6 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
             ui->trackEditor->setEditPos(editPos);
         }
     }
-    else if (ci.patternEditor)
-        ui->trackEditor->update();
 
     if (ci.trackTab)
         ui->tabTrack->updateTrackTab();
@@ -271,6 +267,7 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
 
     if (ci.optionsTab)
         ui->tabOptions->updateOptionsTab();
+    update();
 }
 
 /*************************************************************************/

@@ -141,7 +141,6 @@ void PatternEditor::setRowsPerBeat(int value) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
-    cmd->ci.patternEditor = true;
 
     undoStack->push(cmd);
 }

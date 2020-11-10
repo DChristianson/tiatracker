@@ -197,7 +197,6 @@ void TrackTab::toggleGlobalTempo(bool toggled) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
-    cmd->ci.patternEditor = true;
 
     undoStack->push(cmd);
 }
@@ -226,7 +225,6 @@ void TrackTab::setEvenSpeed(int value) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
-    cmd->ci.patternEditor = true;
 
     undoStack->push(cmd);
 }
@@ -255,7 +253,6 @@ void TrackTab::setOddSpeed(int value) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     cmd->ci.trackTab = true;
-    cmd->ci.patternEditor = true;
 
     undoStack->push(cmd);
 }
@@ -298,8 +295,6 @@ void TrackTab::setStartPattern(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
-
-    update();
 }
 
 /*************************************************************************/
@@ -324,8 +319,6 @@ void TrackTab::renamePattern(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
-
-    update();
 }
 
 /*************************************************************************/
@@ -356,8 +349,6 @@ void TrackTab::setGoto(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
-
-    update();
 }
 
 /*************************************************************************/
@@ -379,8 +370,6 @@ void TrackTab::removeGoto(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
-
-    update();
 }
 
 /*************************************************************************/
@@ -399,8 +388,6 @@ void TrackTab::movePattern(bool isUp, int entryIndex) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd);
-
-    update();
 }
 
 /*************************************************************************/
@@ -467,7 +454,6 @@ void TrackTab::insertPattern(bool doBefore) {
 
     undoStack->push(upper_cmd); // pre, post and redo methods are called here
 
-    update();
 }
 
 /*************************************************************************/
@@ -528,8 +514,6 @@ void TrackTab::removePattern(bool) {
 
     cmd->ci.selectedChannel = contextEventChannel;
     cmd->ci.editPosTo = pe->getEditPos();
-
-    update();
 }
 
 /*************************************************************************/
@@ -558,8 +542,6 @@ void TrackTab::duplicatePattern(bool) {
     cmd->ci.trackStats = true;
 
     undoStack->push(cmd);
-
-    update();
 }
 
 /*************************************************************************/
@@ -601,8 +583,6 @@ void TrackTab::setSlideValue(bool) {
     cmd->ci.editPosTo = pe->getEditPos() + 1;
 
     undoStack->push(cmd); // post and redo methods are called here
-
-    updatePatternEditor();
 }
 
 /*************************************************************************/
@@ -639,8 +619,6 @@ void TrackTab::setFrequency(bool) {
     cmd->ci.editPosTo = pe->getEditPos() + 1;
 
     undoStack->push(cmd); // post and redo methods are called here
-
-    updatePatternEditor();
 }
 
 /*************************************************************************/
@@ -667,8 +645,6 @@ void TrackTab::setHold(bool) {
     cmd->ci.editPosTo = pe->getEditPos() + 1;
 
     undoStack->push(cmd); // post and redo methods are called here
-
-    update();
 }
 
 /*************************************************************************/
@@ -695,8 +671,6 @@ void TrackTab::setPause(bool) {
     cmd->ci.editPosTo = pe->getEditPos() + 1;
 
     undoStack->push(cmd); // post and redo methods are called here
-
-    update();
 }
 
 /*************************************************************************/
@@ -731,8 +705,6 @@ void TrackTab::deleteRow(bool) {
 
     cmd->ci.selectedChannel = contextEventChannel;
     cmd->ci.editPosTo = pe->getEditPos();
-
-    update();
 }
 
 /*************************************************************************/
@@ -758,8 +730,6 @@ void TrackTab::insertRowBefore(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd); // post and redo methods are called here
-
-    update();
 }
 
 /*************************************************************************/
@@ -785,8 +755,6 @@ void TrackTab::insertRowAfter(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     undoStack->push(cmd); // post and redo methods are called here
-
-    update();
 }
 
 /*************************************************************************/
@@ -842,13 +810,6 @@ void TrackTab::updateTrackStats() {
     } else {
         bpmLabel->setText("n/a (local tempo)");
     }
-}
-
-/*************************************************************************/
-
-void TrackTab::updatePatternEditor() {
-    PatternEditor *editor = findChild<PatternEditor *>("trackEditor");
-    editor->update();
 }
 
 /*************************************************************************/

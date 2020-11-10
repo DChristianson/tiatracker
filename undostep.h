@@ -9,7 +9,6 @@ struct commandInfo {
     int editPosTo = -1;
     bool trackStats = false;
     bool trackTab = false;
-    bool patternEditor = false;
     bool optionsTab = false;
 };
 
