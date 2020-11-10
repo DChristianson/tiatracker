@@ -25,7 +25,6 @@ public:
     explicit PatternEditor(QWidget *parent = 0);
 
     void registerTrack(Track::Track *newTrack);
-    void registerPitchGuide(TiaSound::PitchGuide *newGuide);
     void registerPlayer(Emulation::Player *newPlayer);
     void registerMuteAction(QAction *newAction);
     void registerPatternMenu(QMenu *newPatternMenu);
@@ -60,6 +59,7 @@ public slots:
     void setEditPos(int newPos);
     void setEditPos(int newChannel, int newPos);
     void setSelectedChannel(int newChannel);
+    void setPitchGuide(TiaSound::PitchGuide *newGuide);
 
     void validateEditPos();
     void advanceEditPos();
@@ -100,8 +100,6 @@ private:
      */
     bool clickedInValidRow(int x, int y, int *channel, int *noteIndex);
 
-    int calcChannelRowPos(int yPos);
-
     int numRows;    // number of visible rows
     int topMargin;  // margin before first row is displayed
 
@@ -115,8 +113,8 @@ private:
     int legendFontHeight;
     int timelineWidth;
 
-    Track::Track *pTrack;
-    TiaSound::PitchGuide *pPitchGuide;
+    Track::Track *pTrack = nullptr;
+    TiaSound::PitchGuide *pPitchGuide = nullptr;
     Emulation::Player *pPlayer = nullptr;
     QAction *muteAction = nullptr;
     QMenu *pPatternMenu = nullptr;

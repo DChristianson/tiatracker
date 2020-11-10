@@ -90,12 +90,6 @@ void TrackTab::registerTrack(Track::Track *newTrack) {
 
 /*************************************************************************/
 
-void TrackTab::registerPitchGuide(TiaSound::PitchGuide *newGuide) {
-    pPitchGuide = newGuide;
-}
-
-/*************************************************************************/
-
 void TrackTab::registerPlayer(Emulation::Player *newPlayer) {
     pPlayer = newPlayer;
 }
@@ -112,7 +106,6 @@ void TrackTab::initTrackTab() {
     timeline->registerTrack(pTrack);
     PatternEditor *editor = findChild<PatternEditor *>("trackEditor");
     editor->registerTrack(pTrack);
-    editor->registerPitchGuide(pPitchGuide);
     editor->registerMuteAction(&actionMuteChannel);
     editor->registerInstrumentSelector(insSel);
 

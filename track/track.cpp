@@ -71,9 +71,13 @@ void Track::newTrack() {
     metaAuthor = "";
     metaName = "";
     metaComment = "";
-    guideName = "";
-    guideBaseFreq = 0.0;
-    guideTvStandard = TiaSound::TvStandard::PAL;
+
+    TiaSound::PitchGuideFactory pgFactory;
+    TiaSound::PitchGuide defaultPitchGuide = pgFactory.getPitchPerfectPalGuide();
+
+    guideName = defaultPitchGuide.name;
+    guideBaseFreq = defaultPitchGuide.baseFreq;
+    guideTvStandard = defaultPitchGuide.tvStandard;
 
     updateFirstNoteNumbers();
 }

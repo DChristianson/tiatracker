@@ -249,8 +249,8 @@ protected:
     T  oldValue;
     T  newValue;
 public:
-    SetValueCommand(Track::Track* track, T& v, const T newV) :
-        TrackCommand(track, "", nullptr),
+    SetValueCommand(Track::Track* track, T& v, const T newV, QUndoCommand* parent = nullptr) :
+        TrackCommand(track, "", parent),
         value(v),
         oldValue(v),
         newValue(newV)

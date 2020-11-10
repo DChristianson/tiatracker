@@ -49,8 +49,9 @@ void PatternEditor::registerTrack(Track::Track *newTrack) {
 
 /*************************************************************************/
 
-void PatternEditor::registerPitchGuide(TiaSound::PitchGuide *newGuide) {
+void PatternEditor::setPitchGuide(TiaSound::PitchGuide *newGuide) {
     pPitchGuide = newGuide;
+    update();
 }
 
 /*************************************************************************/

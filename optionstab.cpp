@@ -86,22 +86,48 @@ void OptionsTab::updateOptionsTab() {
     // Pitch guide
     QLabel *infoLabel = findChild<QLabel *>("labelGuideInfo");
     QComboBox *cbGuides = findChild<QComboBox *>("comboBoxPitchGuide");
-    TiaSound::PitchGuide *pg = &(guides[cbGuides->currentIndex()]);
-    QString tvText = (pg->tvStandard == TiaSound::TvStandard::PAL ? "PAL" : "NTSC");
-    infoLabel->setText("(" + tvText + ", " + QString::number(pg->baseFreq) + "Hz)");
+    TiaSound::PitchGuide* pitchGuide = nullptr;
+    for (int index = 0; index < guides.size(); index++) {
+        auto& pg = guides[index];
+        if (pg.name == pTrack->guideName
+            && pg.baseFreq == pTrack->guideBaseFreq
+            && pg.tvStandard == pTrack->guideTvStandard) {
+            cbGuides->blockSignals(true);
+            cbGuides->setCurrentIndex(index);           
+            cbGuides->blockSignals(false);
+            pitchGuide = &pg;
+            break;
+        }
+    }
+    emit setPitchGuide(pitchGuide); 
+    if (pitchGuide) {
+        QString tvText = (pitchGuide->tvStandard == TiaSound::TvStandard::PAL ? "PAL" : "NTSC");
+        infoLabel->setText("(" + tvText + ", " + QString::number(pitchGuide->baseFreq) + "Hz)");
+    }
+    else {
+        infoLabel->setText("");
+    }
 }
 
 /*************************************************************************/
 
 void OptionsTab::on_comboBoxPitchGuide_currentIndexChanged(int index) {
     // Update guide data for track
-    QComboBox *cbGuides = findChild<QComboBox *>("comboBoxPitchGuide");
-    TiaSound::PitchGuide *pg = &(guides[cbGuides->currentIndex()]);
-    pTrack->guideName = pg->name;
-    pTrack->guideBaseFreq = pg->baseFreq;
-    pTrack->guideTvStandard = pg->tvStandard;
-    updateOptionsTab();
-    emit setPitchGuide(guides[index]);
+    const auto& pg = guides[index];
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new TrackCommand(pTrack, "Set Pitch Guide");
+
+    new SetValueCommand<QString>(pTrack, pTrack->guideName, pg.name, cmd);
+    new SetValueCommand<double>(pTrack, pTrack->guideBaseFreq, pg.baseFreq, cmd);
+    new SetValueCommand<TiaSound::TvStandard>(pTrack, pTrack->guideTvStandard, pg.tvStandard, cmd);
+
+    cmd->post = this->window()->findChild<UndoStep*>("TrackTabUpdate");
+
+    cmd->ci.optionsTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/

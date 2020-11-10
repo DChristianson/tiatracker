@@ -208,7 +208,8 @@ void MainWindow::initConnections() {
     // OptionsTab
     QObject::connect(ui->radioButtonPal, SIGNAL(toggled(bool)), ui->tabOptions, SLOT(on_radioButtonPal_toggled(bool)));
     QObject::connect(ui->comboBoxPitchGuide, SIGNAL(currentIndexChanged(int)), ui->tabOptions, SLOT(on_comboBoxPitchGuide_currentIndexChanged(int)));
-    QObject::connect(ui->tabOptions, SIGNAL(setPitchGuide(TiaSound::PitchGuide)), this, SLOT(setPitchGuide(TiaSound::PitchGuide)));
+    QObject::connect(ui->tabOptions, SIGNAL(setPitchGuide(TiaSound::PitchGuide*)), this, SLOT(setPitchGuide(TiaSound::PitchGuide*)));
+    QObject::connect(ui->tabOptions, SIGNAL(setPitchGuide(TiaSound::PitchGuide*)), ui->trackEditor, SLOT(setPitchGuide(TiaSound::PitchGuide*)));
     QObject::connect(ui->spinBoxOffTuneThreshold, SIGNAL(valueChanged(int)), ui->pianoKeyboard, SLOT(setOffThreshold(int)));
     QObject::connect(ui->tabOptions, SIGNAL(setOffTuneThreshold(int)), ui->pianoKeyboard, SLOT(setOffThreshold(int)));
     QObject::connect(ui->pushButtonGuideCreate, SIGNAL(clicked(bool)), ui->tabOptions, SLOT(on_pushButtonGuideCreate_clicked(bool)));
@@ -293,20 +294,6 @@ void MainWindow::registerTrack(Track::Track *newTrack) {
 
 /*************************************************************************/
 
-TiaSound::PitchGuide *MainWindow::getPitchGuide() {
-    return &curPitchGuide;
-}
-
-/*************************************************************************/
-
-void MainWindow::setPitchGuide(TiaSound::PitchGuide newGuide) {
-    curPitchGuide = newGuide;
-    updateAllTabs();
-    update();
-}
-
-/*************************************************************************/
-
 void MainWindow::displayMessage(const QString &message) {
 
     QMessageBox msgBox(QMessageBox::NoIcon,
@@ -319,8 +306,14 @@ void MainWindow::displayMessage(const QString &message) {
 
 /*************************************************************************/
 
+void MainWindow::setPitchGuide(TiaSound::PitchGuide *newGuide) {
+    pPitchGuide = newGuide;
+}
+
+/*************************************************************************/
+
 void MainWindow::setWaveform(TiaSound::Distortion dist) {
-    TiaSound::InstrumentPitchGuide *pIPG = &(curPitchGuide.instrumentGuides[dist]);
+    TiaSound::InstrumentPitchGuide *pIPG = &(pPitchGuide->instrumentGuides[dist]);
     ui->pianoKeyboard->setInstrumentPitchGuide(pIPG);
     ui->pianoKeyboard->setUsePitchGuide(true);
     ui->pianoKeyboard->update();
@@ -556,19 +549,15 @@ void MainWindow::setTrackName(QString name) {
 void MainWindow::updateAllTabs() {
     TrackTab *trackTab = findChild<TrackTab *>("tabTrack");
     trackTab->updateTrackTab();
-    trackTab->update();
 
     InstrumentsTab *insTab = findChild<InstrumentsTab *>("tabInstruments");
     insTab->updateInstrumentsTab();
-    insTab->update();
 
     PercussionTab *percTab = findChild<PercussionTab *>("tabPercussion");
     percTab->updatePercussionTab();
-    percTab->update();
 
     OptionsTab *optionsTab = findChild<OptionsTab *>("tabOptions");
     optionsTab->updateOptionsTab();
-    optionsTab->update();
 
     InstrumentSelector *insSel = findChild<InstrumentSelector *>("trackInstrumentSelector");
     insSel->setSelectedInstrument(0);
@@ -874,8 +863,6 @@ void MainWindow::on_actionNew_triggered() {
     ui->trackEditor->setEditPos(0);
     updateAllTabs();
     pTrack->unlock();
-    QComboBox *cbGuides = findChild<QComboBox *>("comboBoxPitchGuide");
-    cbGuides->setCurrentIndex(0);
     pUndoStack->clear();
     update();
 }

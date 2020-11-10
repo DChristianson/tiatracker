@@ -27,7 +27,6 @@ public:
     explicit TrackTab(QWidget *parent = 0);
 
     void registerTrack(Track::Track *newTrack);
-    void registerPitchGuide(TiaSound::PitchGuide *newGuide);
     void registerPlayer(Emulation::Player *newPlayer);
 
     /* Initializes the GUI components. Must be called once during init. */
@@ -93,7 +92,6 @@ private:
     void movePattern(bool isUp, int entryIndex);
 
     Track::Track *pTrack = nullptr;
-    TiaSound::PitchGuide *pPitchGuide;
     Emulation::Player *pPlayer = nullptr;
 
     // Global actions

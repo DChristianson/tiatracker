@@ -66,8 +66,6 @@ public:
 
     void registerTrack(Track::Track *newTrack);
 
-    TiaSound::PitchGuide *getPitchGuide();
-
     /* Displays a message in an "OK" messagebox */
     static void displayMessage(const QString &message);
 
@@ -76,7 +74,7 @@ public:
     static QJsonObject keymap;
 
 public slots:
-    void setPitchGuide(TiaSound::PitchGuide newGuide);
+    void setPitchGuide(TiaSound::PitchGuide *newGuide);
     // Set a new pitch guide for the piano keyboard
     void setWaveform(TiaSound::Distortion dist);
     // Update odd and even speeds based on new edit pos (if global tempo is false)
@@ -191,8 +189,7 @@ private:
 
     Ui::MainWindow *ui = nullptr;
     Track::Track *pTrack = nullptr;
-    TiaSound::PitchGuideFactory pgFactory;
-    TiaSound::PitchGuide curPitchGuide = pgFactory.getPitchPerfectPalGuide();
+    TiaSound::PitchGuide *pPitchGuide = nullptr;
 
     QMenu waveformContextMenu{this};
     QAction actionInsertBefore{"Insert frame before", this};

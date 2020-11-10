@@ -29,7 +29,7 @@ public:
 
 signals:
     void setTVStandard(int);
-    void setPitchGuide(TiaSound::PitchGuide newGuide);
+    void setPitchGuide(TiaSound::PitchGuide *newGuide);
     void setOffTuneThreshold(int value);
 
 public slots:
