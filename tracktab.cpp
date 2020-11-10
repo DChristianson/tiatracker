@@ -452,8 +452,11 @@ void TrackTab::insertPattern(bool doBefore) {
     // hold gui stuffs in the uppest command:
     upper_cmd->ci.trackStats = true;
 
-    undoStack->push(upper_cmd); // pre, post and redo methods are called here
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
+    upper_cmd->ci.editPosFrom = pe->getEditPos();
+
+    undoStack->push(upper_cmd); // pre, post and redo methods are called here
 }
 
 /*************************************************************************/
@@ -540,6 +543,10 @@ void TrackTab::duplicatePattern(bool) {
 
     // hold gui stuffs in the command:
     cmd->ci.trackStats = true;
+
+    PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
+
+    cmd->ci.editPosFrom = pe->getEditPos();
 
     undoStack->push(cmd);
 }
