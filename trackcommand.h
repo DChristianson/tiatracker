@@ -280,6 +280,8 @@ public:
         if (&value != &other_like_me->value)
             return false; // target mismatch
         newValue = other_like_me->newValue;
+        if (newValue == oldValue)
+            setObsolete(true);
         return true; // other will be deleted
     }
 
