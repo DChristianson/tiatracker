@@ -307,13 +307,35 @@ class SetInstrumentCommand : public TrackCommand
     int iInstrumentIndex;
     Track::Instrument newInstrument;
     Track::Instrument oldInstrument;
+    bool bMergeable;
+
+    int _id;
+    static bool ID;
 
 public:
-    SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument);
+    SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument,
+        bool mergeable = false);
+
+    int id() const final { return bMergeable ? _id : -1; }
+
+    bool mergeWith(const QUndoCommand *other) final
+    {
+        if (other->id() != id())
+            return false;
+        auto other_like_me = dynamic_cast<const SetInstrumentCommand*>(other);
+        assert(other_like_me != nullptr);
+        if (iInstrumentIndex != other_like_me->iInstrumentIndex)
+            return false; // target mismatch
+        newInstrument = other_like_me->newInstrument;
+        if (newInstrument == oldInstrument)
+            setObsolete(true);
+        return true; // other will be deleted
+    }
 
     void do_undo() final;
     void do_redo() final;
 
+    static void ToggleID() { ID = !ID; }
 };
 
 #endif // TRACKCOMMAND_H

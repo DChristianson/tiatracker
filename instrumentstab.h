@@ -44,22 +44,19 @@ public slots:
     void on_buttonInstrumentExport_clicked();
     void on_buttonInstrumentImport_clicked();
 
-    void on_spinBoxInstrumentEnvelopeLength_editingFinished();
     void on_spinBoxInstrumentEnvelopeLength_valueChanged(int newLength);
 
-    void on_spinBoxSustainStart_editingFinished();
     void on_spinBoxSustainStart_valueChanged(int newStart);
 
-    void on_spinBoxReleaseStart_editingFinished();
     void on_spinBoxReleaseStart_valueChanged(int newStart);
 
-    void on_spinBoxInstrumentVolume_editingFinished();
     void on_spinBoxInstrumentVolume_valueChanged(int newVolume);
 
     void on_comboBoxWaveforms_currentIndexChanged(int index);
 
     void on_comboBoxInstruments_currentIndexChanged(int);
-    void on_comboBoxInstruments_currentTextChanged(const QString &text);
+    void on_comboBoxInstruments_editTextChanged(const QString &text);
+    void on_comboBoxInstruments_editingFinished();
 
 protected:
 

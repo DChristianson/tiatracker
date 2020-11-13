@@ -109,37 +109,54 @@ void InstrumentsTab::updateInstrumentsTab() {
     }
     lInstrumentsUsed->setText(instrumentsUsedString);
     // Names
+    int iCurInstrument = getSelectedInstrumentIndex();
     QComboBox *cbInstruments = findChild<QComboBox *>("comboBoxInstruments");
-    for (int ins = 0; ins < pTrack->numInstruments; ++ins) {
-        cbInstruments->setItemText(ins, pTrack->instruments[ins].name);
+    if (!cbInstruments->lineEdit()->hasFocus()) {
+        cbInstruments->blockSignals(true);
+        for (int ins = 0; ins < pTrack->numInstruments; ++ins) {
+            cbInstruments->setItemText(ins, pTrack->instruments[ins].name);
+        }
+        // special requirement to update a QComboBox
+        // when signals are disabled:
+        cbInstruments->setCurrentIndex(iCurInstrument);
+        cbInstruments->blockSignals(false);
     }
 
     /* Values specific to the selected intrument */
-    int iCurInstrument = getSelectedInstrumentIndex();
     QLabel *lInstrumentNumber = findChild<QLabel *>("labelInstrumentNumber");
     lInstrumentNumber->setText("Instrument " + QString::number(iCurInstrument + 1));
     Track::Instrument& curInstrument = pTrack->instruments[iCurInstrument];
     // Envelope length
     QSpinBox *spEnvelopeLength = findChild<QSpinBox *>("spinBoxInstrumentEnvelopeLength");
     int envelopeLength = curInstrument.getEnvelopeLength();
+    spEnvelopeLength->blockSignals(true);
     spEnvelopeLength->setValue(envelopeLength);
+    spEnvelopeLength->blockSignals(false);
     // Sustain and release start values
     QSpinBox *spSustainStart = findChild<QSpinBox *>("spinBoxSustainStart");
     int sustainStart = curInstrument.getSustainStart();
+    spSustainStart->blockSignals(true);
     spSustainStart->setValue(sustainStart + 1);
+    spSustainStart->blockSignals(false);
     QSpinBox *spReleaseStart = findChild<QSpinBox *>("spinBoxReleaseStart");
     int releaseStart = curInstrument.getReleaseStart();
+    spReleaseStart->blockSignals(true);
     spReleaseStart->setValue(releaseStart + 1);
+    spReleaseStart->blockSignals(false);
     // Peak volume
     QSpinBox *spPeakVolume = findChild<QSpinBox *>("spinBoxInstrumentVolume");
     int maxVolume = curInstrument.getMaxVolume();
+    spPeakVolume->blockSignals(true);
     spPeakVolume->setValue(maxVolume);
+    spPeakVolume->blockSignals(false);
     // Base waveform
     TiaSound::Distortion curDistortion = curInstrument.baseDistortion;
     int iWaveform = availableWaveforms.indexOf(curDistortion);
     assert(iWaveform != -1);
     QComboBox *cbWaveforms = findChild<QComboBox *>("comboBoxWaveforms");
+    cbWaveforms->blockSignals(true);
     cbWaveforms->setCurrentIndex(iWaveform);
+    cbWaveforms->blockSignals(false);
     emit setWaveform(curInstrument.baseDistortion);
     // EnvelopeShaper sizes and values
     EnvelopeShaper *wsVolume = findChild<EnvelopeShaper *>("volumeShaper");
@@ -311,109 +328,152 @@ void InstrumentsTab::on_buttonInstrumentImport_clicked() {
 
 /*************************************************************************/
 
-void InstrumentsTab::on_spinBoxInstrumentEnvelopeLength_editingFinished() {
-    QSpinBox *sb = findChild<QSpinBox *>("spinBoxInstrumentEnvelopeLength");
-    int newLength = sb->value();
-    Track::Instrument *curInstrument = getSelectedInstrument();
-    pTrack->lock();
-    curInstrument->setEnvelopeLength(newLength);
-    pTrack->unlock();
-    updateInstrumentsTab();
-    update();
-}
-
 void InstrumentsTab::on_spinBoxInstrumentEnvelopeLength_valueChanged(int newLength) {
     Track::Instrument *curInstrument = getSelectedInstrument();
-    if (std::abs(newLength - curInstrument->getEnvelopeLength()) == 1) {
-        on_spinBoxInstrumentEnvelopeLength_editingFinished();
-    }
+    if (std::abs(newLength - curInstrument->getEnvelopeLength()) != 1)
+        return;
+
+    Track::Instrument inst = *curInstrument;
+    inst.setEnvelopeLength(newLength);
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Set Instrument Envelope Length");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
-
-void InstrumentsTab::on_spinBoxSustainStart_editingFinished() {
-    QSpinBox *sb = findChild<QSpinBox *>("spinBoxSustainStart");
-    int newStart = sb->value() - 1;
-    Track::Instrument *curInstrument = getSelectedInstrument();
-    if (newStart < curInstrument->getReleaseStart()) {
-        // valid new value
-        curInstrument->setSustainAndRelease(newStart, curInstrument->getReleaseStart());
-    } else {
-        // invalid new value. Try to push release start
-        int newRelease = newStart + 1;
-        if (newRelease < curInstrument->getEnvelopeLength()) {
-            curInstrument->setSustainAndRelease(newStart, newRelease);
-        } else {
-            // Release start cannot be pushed ahead, so reject new sustain value
-            sb->setValue(curInstrument->getSustainStart() + 1);
-        }
-    }
-    updateInstrumentsTab();
-    update();
-}
 
 void InstrumentsTab::on_spinBoxSustainStart_valueChanged(int newStart) {
     newStart--;
     Track::Instrument *curInstrument = getSelectedInstrument();
-    if (std::abs(newStart - curInstrument->getSustainStart()) == 1) {
-        on_spinBoxSustainStart_editingFinished();
+    if (std::abs(newStart - curInstrument->getSustainStart()) != 1)
+        return;
+    
+    Track::Instrument inst = *curInstrument;
+    {
+        QSpinBox *sb = findChild<QSpinBox *>("spinBoxSustainStart");
+        int newStart = sb->value() - 1;
+        if (newStart < inst.getReleaseStart()) {
+            // valid new value
+            inst.setSustainAndRelease(newStart, inst.getReleaseStart());
+        }
+        else {
+            // invalid new value. Try to push release start
+            int newRelease = newStart + 1;
+            if (newRelease < inst.getEnvelopeLength()) {
+                inst.setSustainAndRelease(newStart, newRelease);
+            }
+            else {
+                // Release start cannot be pushed ahead, so reject new sustain value
+                sb->blockSignals(true);
+                sb->setValue(inst.getSustainStart() + 1);
+                sb->blockSignals(false);
+                return;
+            }
+        }
     }
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Set Instrument Sustain Start");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
-
-void InstrumentsTab::on_spinBoxReleaseStart_editingFinished() {
-    QSpinBox *sb = findChild<QSpinBox *>("spinBoxReleaseStart");
-    int newStart = sb->value() - 1;
-    Track::Instrument *curInstrument = getSelectedInstrument();
-    if (newStart < curInstrument->getEnvelopeLength()
-            && newStart > curInstrument->getSustainStart()) {
-        // valid new value
-        curInstrument->setSustainAndRelease(curInstrument->getSustainStart(), newStart);
-    } else {
-        // invalid new value
-        sb->setValue(curInstrument->getReleaseStart() + 1);
-    }
-    updateInstrumentsTab();
-    update();
-}
 
 void InstrumentsTab::on_spinBoxReleaseStart_valueChanged(int newStart) {
     newStart--;
     Track::Instrument *curInstrument = getSelectedInstrument();
-    if (std::abs(newStart - curInstrument->getReleaseStart()) == 1) {
-        on_spinBoxReleaseStart_editingFinished();
+    if (std::abs(newStart - curInstrument->getReleaseStart()) != 1)
+        return;
+
+    Track::Instrument inst = *curInstrument;
+    {
+        QSpinBox *sb = findChild<QSpinBox *>("spinBoxReleaseStart");
+        int newStart = sb->value() - 1;
+        if (newStart < inst.getEnvelopeLength()
+            && newStart > inst.getSustainStart()) {
+            // valid new value
+            inst.setSustainAndRelease(inst.getSustainStart(), newStart);
+        }
+        else {
+            // invalid new value
+            sb->blockSignals(true);
+            sb->setValue(inst.getReleaseStart() + 1);
+            sb->blockSignals(false);
+            return;
+        }
     }
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Set Instrument Release Start");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
 
-void InstrumentsTab::on_spinBoxInstrumentVolume_editingFinished() {
-    QSpinBox *sb = findChild<QSpinBox *>("spinBoxInstrumentVolume");
-    int newVolume = sb->value();
-    Track::Instrument *curInstrument = getSelectedInstrument();
-    int curMin = curInstrument->getMinVolume();
-    int curMax = curInstrument->getMaxVolume();
-    int curVolumeSpan = curMax - curMin;
-    if (newVolume - curVolumeSpan >= 0) {
-        // Shift volumes
-        int volumeShift = newVolume - curMax;
-        for (int i = 0; i < curInstrument->getEnvelopeLength(); ++i) {
-            curInstrument->volumes[i] += volumeShift;
-        }
-    } else {
-        // Invalid value: Set volume to current max
-        sb->setValue(curInstrument->getMaxVolume());
-    }
-    updateInstrumentsTab();
-    update();
-}
-
 void InstrumentsTab::on_spinBoxInstrumentVolume_valueChanged(int newVolume) {
     Track::Instrument *curInstrument = getSelectedInstrument();
-    if (std::abs(newVolume - curInstrument->getMaxVolume()) == 1) {
-        on_spinBoxInstrumentVolume_editingFinished();
+    if (std::abs(newVolume - curInstrument->getMaxVolume()) != 1)
+        return;
+
+    Track::Instrument inst = *curInstrument;   
+    {
+        QSpinBox *sb = findChild<QSpinBox *>("spinBoxInstrumentVolume");
+        int newVolume = sb->value();
+        int curMin = inst.getMinVolume();
+        int curMax = inst.getMaxVolume();
+        int curVolumeSpan = curMax - curMin;
+        if (newVolume - curVolumeSpan >= 0) {
+            // Shift volumes
+            int volumeShift = newVolume - curMax;
+            for (int i = 0; i < inst.getEnvelopeLength(); ++i) {
+                inst.volumes[i] += volumeShift;
+            }
+        }
+        else {
+            // Invalid value: Set volume to current max
+            sb->blockSignals(true);
+            sb->setValue(inst.getMaxVolume());
+            sb->blockSignals(false);
+            return;
+        }
     }
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Set Instrument Peak volume");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
@@ -421,10 +481,21 @@ void InstrumentsTab::on_spinBoxInstrumentVolume_valueChanged(int newVolume) {
 void InstrumentsTab::on_comboBoxWaveforms_currentIndexChanged(int index) {
     Track::Instrument *curInstrument = getSelectedInstrument();
     TiaSound::Distortion newDistortion = availableWaveforms[index];
-    curInstrument->baseDistortion = newDistortion;
 
-    updateInstrumentsTab();
-    update();
+    Track::Instrument inst = *curInstrument;
+    inst.baseDistortion = newDistortion;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Set Instrument Base waveform");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
@@ -434,11 +505,33 @@ void InstrumentsTab::on_comboBoxInstruments_currentIndexChanged(int) {
     update();
 }
 
-void InstrumentsTab::on_comboBoxInstruments_currentTextChanged(const QString &text) {
+/*************************************************************************/
+
+void InstrumentsTab::on_comboBoxInstruments_editTextChanged(const QString &text) {
     Track::Instrument *curInstrument = getSelectedInstrument();
-    curInstrument->name = text;
-    updateInstrumentsTab();
-    update();
+
+    Track::Instrument inst = *curInstrument;
+    inst.name = text;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst),
+        /*mergeable =*/ true);
+
+    cmd->setText("Set Instrument Name");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
+
+void InstrumentsTab::on_comboBoxInstruments_editingFinished()
+{
+    SetInstrumentCommand::ToggleID();
+
+    setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
+}

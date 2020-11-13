@@ -337,4 +337,16 @@ int Instrument::getEnvelopeLength() {
     return envelopeLength;
 }
 
+/*************************************************************************/
+
+bool Instrument::operator==(const Instrument& other) const {
+    return name == other.name
+        && baseDistortion == other.baseDistortion
+        && volumes == other.volumes
+        && frequencies == other.frequencies
+        && envelopeLength == other.envelopeLength
+        && sustainStart == other.sustainStart
+        && releaseStart == other.releaseStart;
+}
+
 }

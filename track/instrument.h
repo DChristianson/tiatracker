@@ -66,6 +66,9 @@ public:
     QList<int> volumes{0, 0};
     QList<int> frequencies{0, 0};
 
+    // cannot be defaulted before C++20
+    bool operator==(const Instrument& other) const;
+
 private:
     /* Helper function for insert before/after */
     void correctSustainReleaseForInsert(int frame);

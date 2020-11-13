@@ -396,12 +396,17 @@ void SetPatternSpeedCommand::do_redo()
 
 // SetInstrumentCommand
 
-SetInstrumentCommand::SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument) :
+bool SetInstrumentCommand::ID = true;
+
+SetInstrumentCommand::SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument,
+    bool mergeable /*= false*/) :
     TrackCommand(track, "", nullptr),
     iInstrumentIndex(instrumentIndex),
     newInstrument(instrument),
-    oldInstrument(pTrack->instruments[iInstrumentIndex])
+    oldInstrument(pTrack->instruments[iInstrumentIndex]),
+    bMergeable(mergeable)
 {
+    _id = int(ID)+2; // 0 and 1 are for SetStringCommand
 }
 
 void SetInstrumentCommand::do_undo()

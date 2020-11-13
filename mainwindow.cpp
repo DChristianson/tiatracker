@@ -102,6 +102,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinBoxEvenTempo->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxOddTempo->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxOffTuneThreshold->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxInstrumentEnvelopeLength->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxSustainStart->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxReleaseStart->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxInstrumentVolume->findChild<QLineEdit*>()->setReadOnly(true);
 }
 
 /*************************************************************************/
@@ -160,18 +164,15 @@ void MainWindow::initConnections() {
     QObject::connect(ui->buttonInstrumentDelete, &QPushButton::clicked, ui->tabInstruments, &InstrumentsTab::on_buttonInstrumentDelete_clicked);
     QObject::connect(ui->buttonInstrumentExport, &QPushButton::clicked, ui->tabInstruments, &InstrumentsTab::on_buttonInstrumentExport_clicked);
     QObject::connect(ui->buttonInstrumentImport, &QPushButton::clicked, ui->tabInstruments, &InstrumentsTab::on_buttonInstrumentImport_clicked);
-    QObject::connect(ui->spinBoxInstrumentEnvelopeLength, &QSpinBox::editingFinished, ui->tabInstruments, &InstrumentsTab::on_spinBoxInstrumentEnvelopeLength_editingFinished);
     QObject::connect(ui->spinBoxInstrumentEnvelopeLength, SIGNAL(valueChanged(int)), ui->tabInstruments, SLOT(on_spinBoxInstrumentEnvelopeLength_valueChanged(int)));
-    QObject::connect(ui->spinBoxSustainStart, &QSpinBox::editingFinished, ui->tabInstruments, &InstrumentsTab::on_spinBoxSustainStart_editingFinished);
     QObject::connect(ui->spinBoxSustainStart, SIGNAL(valueChanged(int)), ui->tabInstruments, SLOT(on_spinBoxSustainStart_valueChanged(int)));
-    QObject::connect(ui->spinBoxReleaseStart, &QSpinBox::editingFinished, ui->tabInstruments, &InstrumentsTab::on_spinBoxReleaseStart_editingFinished);
     QObject::connect(ui->spinBoxReleaseStart, SIGNAL(valueChanged(int)), ui->tabInstruments, SLOT(on_spinBoxReleaseStart_valueChanged(int)));
-    QObject::connect(ui->spinBoxInstrumentVolume, &QSpinBox::editingFinished, ui->tabInstruments, &InstrumentsTab::on_spinBoxInstrumentVolume_editingFinished);
     QObject::connect(ui->spinBoxInstrumentVolume, SIGNAL(valueChanged(int)), ui->tabInstruments, SLOT(on_spinBoxInstrumentVolume_valueChanged(int)));
     QObject::connect(ui->comboBoxWaveforms, SIGNAL(currentIndexChanged(int)), ui->tabInstruments, SLOT(on_comboBoxWaveforms_currentIndexChanged(int)));
     QObject::connect(ui->volumeShaper, &EnvelopeShaper::newMaxValue, ui->spinBoxInstrumentVolume, &QSpinBox::setValue);
     QObject::connect(ui->comboBoxInstruments, SIGNAL(currentIndexChanged(int)), ui->tabInstruments, SLOT(on_comboBoxInstruments_currentIndexChanged(int)));
-    QObject::connect(ui->comboBoxInstruments, SIGNAL(currentTextChanged(QString)), ui->tabInstruments, SLOT(on_comboBoxInstruments_currentTextChanged(QString)));
+    QObject::connect(ui->comboBoxInstruments, SIGNAL(editTextChanged(QString)), ui->tabInstruments, SLOT(on_comboBoxInstruments_editTextChanged(QString)));
+    QObject::connect(ui->comboBoxInstruments->lineEdit(), SIGNAL(editingFinished()), ui->tabInstruments, SLOT(on_comboBoxInstruments_editingFinished()));
     QObject::connect(ui->volumeShaper, SIGNAL(envelopeContextEvent(int)), this, SLOT(waveformContextEvent(int)));
     QObject::connect(ui->frequencyShaper, SIGNAL(envelopeContextEvent(int)), this, SLOT(waveformContextEvent(int)));
 
