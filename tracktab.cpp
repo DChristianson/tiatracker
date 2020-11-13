@@ -109,7 +109,7 @@ void TrackTab::initTrackTab() {
     editor->registerMuteAction(&actionMuteChannel);
     editor->registerInstrumentSelector(insSel);
 
-    // Gloabl actions
+    // Global actions
     QObject::connect(&actionMoveUp, SIGNAL(triggered(bool)), editor, SLOT(moveUp(bool)));
     QObject::connect(&actionMoveDown, SIGNAL(triggered(bool)), editor, SLOT(moveDown(bool)));
     QObject::connect(&actionLeftChannel, SIGNAL(triggered(bool)), editor, SLOT(moveLeft(bool)));

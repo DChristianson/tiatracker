@@ -59,22 +59,18 @@ int main(int argc, char *argv[])
     InstrumentsTab *it = w.findChild<InstrumentsTab *>("tabInstruments");
     it->registerTrack(&myTrack);
     it->initInstrumentsTab();
-    it->updateInstrumentsTab();
 
     PercussionTab *pt = w.findChild<PercussionTab *>("tabPercussion");
     pt->registerTrack(&myTrack);
     pt->initPercussionTab();
-    pt->updatePercussionTab();
 
     TrackTab *tt = w.findChild<TrackTab *>("tabTrack");
     tt->registerTrack(&myTrack);
     tt->initTrackTab();
-    tt->updateTrackTab();
 
     OptionsTab *ot = w.findChild<OptionsTab *>("tabOptions");
     ot->registerTrack(&myTrack);
     ot->initOptionsTab();
-    ot->updateOptionsTab();
 
     w.initConnections();
 

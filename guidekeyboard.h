@@ -78,8 +78,6 @@ private:
     int keyFontHeight;
     int keyInfoRectHeight;
 
-    bool usePitchGuide = false;
-
     /* Calc x-pos for a given white or black key (0..numKeys) */
     int calcWhiteKeyXPos(int key);
     int calcBlackKeyXPos(int key);
