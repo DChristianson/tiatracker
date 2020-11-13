@@ -269,6 +269,9 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
     else if (ci.trackStats)
         ui->tabTrack->updateTrackStats();
 
+    if (ci.instrumentTab)
+        ui->tabInstruments->updateInstrumentsTab();
+
     update();
 }
 

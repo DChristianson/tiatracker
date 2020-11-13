@@ -300,4 +300,18 @@ public:
     void do_redo() final;
 };
 
+class SetInstrumentCommand : public TrackCommand
+{
+    int iInstrumentIndex;
+    Track::Instrument newInstrument;
+    Track::Instrument oldInstrument;
+
+public:
+    SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument);
+
+    void do_undo() final;
+    void do_redo() final;
+
+};
+
 #endif // TRACKCOMMAND_H

@@ -393,3 +393,27 @@ void SetPatternSpeedCommand::do_redo()
 
     speed = newSpeed;
 }
+
+// SetInstrumentCommand
+
+SetInstrumentCommand::SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument) :
+    TrackCommand(track, "", nullptr),
+    iInstrumentIndex(instrumentIndex),
+    newInstrument(instrument),
+    oldInstrument(pTrack->instruments[iInstrumentIndex])
+{
+}
+
+void SetInstrumentCommand::do_undo()
+{
+    pTrack->lock();
+    pTrack->instruments[iInstrumentIndex] = oldInstrument;
+    pTrack->unlock();
+}
+
+void SetInstrumentCommand::do_redo()
+{
+    pTrack->lock();
+    pTrack->instruments[iInstrumentIndex] = newInstrument;
+    pTrack->unlock();
+}

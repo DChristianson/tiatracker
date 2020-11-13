@@ -183,13 +183,20 @@ void InstrumentsTab::on_buttonInstrumentDelete_clicked() {
             doDelete = false;
         }
     }
-    if (doDelete) {
-        pTrack->lock();
-        curInstrument->deleteInstrument();
-        pTrack->unlock();
-        updateInstrumentsTab();
-        update();
-    }
+    if (!doDelete)
+        return;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), Track::Instrument("---"));
+
+    cmd->setText("Delete Instrument " + curInstrument->name);
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
@@ -280,14 +287,26 @@ void InstrumentsTab::on_buttonInstrumentImport_clicked() {
     }
     QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
 
+    Track::Instrument inst(curInstrument->name);
     // Parse in data
-    if (!curInstrument->import(loadDoc.object())) {
+    if (!inst.import(loadDoc.object())) {
         MainWindow::displayMessage("Unable to parse instrument!");
         return;
     }
-    // Update display
-    updateInstrumentsTab();
-    update();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    QString instName = inst.name;
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Import Instrument " + instName);
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/

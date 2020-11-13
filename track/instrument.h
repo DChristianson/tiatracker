@@ -39,8 +39,6 @@ public:
     void toJson(QJsonObject &json);
     bool import(const QJsonObject &json);
 
-    void deleteInstrument();
-
     /* Checks if release starts after sustain and if not, changes
      * values accordingly. */
     void validateSustainReleaseValues();
