@@ -12,6 +12,7 @@
 #include <QRadioButton>
 #include <QPlainTextEdit>
 #include <QTextDocument>
+#include "pianokeyboard.h"
 
 
 OptionsTab::OptionsTab(QWidget *parent) : QWidget(parent)
@@ -107,6 +108,13 @@ void OptionsTab::updateOptionsTab() {
     else {
         infoLabel->setText("");
     }
+
+    // Off-tune warning
+    QSpinBox* spinBoxOffTuneThreshold = findChild<QSpinBox *>("spinBoxOffTuneThreshold");
+    spinBoxOffTuneThreshold->blockSignals(true);
+    auto pianoKeyboard = this->window()->findChild<PianoKeyboard*>("pianoKeyboard");
+    spinBoxOffTuneThreshold->setValue(pianoKeyboard->offThreshold);
+    spinBoxOffTuneThreshold->blockSignals(false);
 }
 
 /*************************************************************************/
@@ -147,13 +155,6 @@ void OptionsTab::on_radioButtonPal_toggled(bool checked) {
     cmd->ci.optionsTab = true;
 
     undoStack->push(cmd);
-}
-
-/*************************************************************************/
-
-void OptionsTab::on_spinBoxOffTuneThreshold_editingFinished() {
-    QSpinBox *sbThreshold = findChild<QSpinBox *>("spinBoxOffTuneThreshold");
-    emit setOffTuneThreshold(sbThreshold->value());
 }
 
 /*************************************************************************/

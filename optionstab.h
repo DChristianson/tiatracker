@@ -30,7 +30,6 @@ public:
 signals:
     void setTVStandard(int);
     void setPitchGuide(TiaSound::PitchGuide *newGuide);
-    void setOffTuneThreshold(int value);
 
 public slots:
     void on_comboBoxPitchGuide_currentIndexChanged(int index);
@@ -44,8 +43,6 @@ private:
 private slots:
 
     void on_radioButtonPal_toggled(bool checked);
-
-    void on_spinBoxOffTuneThreshold_editingFinished();
 
     void on_pushButtonGuideCreate_clicked(bool);
 

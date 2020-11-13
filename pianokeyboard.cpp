@@ -182,8 +182,18 @@ void PianoKeyboard::pianoKeyShortcut(bool) {
 /*************************************************************************/
 
 void PianoKeyboard::setOffThreshold(int value) {
-    offThreshold = value;
-    update();
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetValueCommand<int>(nullptr, offThreshold, value);
+
+    cmd->setText("Set Off-tune % warning");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.optionsTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/

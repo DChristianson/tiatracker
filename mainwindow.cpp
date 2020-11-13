@@ -101,6 +101,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinBoxRowsPerBeat->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxEvenTempo->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxOddTempo->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxOffTuneThreshold->findChild<QLineEdit*>()->setReadOnly(true);
 }
 
 /*************************************************************************/
@@ -209,7 +210,6 @@ void MainWindow::initConnections() {
     QObject::connect(ui->tabOptions, SIGNAL(setPitchGuide(TiaSound::PitchGuide*)), this, SLOT(setPitchGuide(TiaSound::PitchGuide*)));
     QObject::connect(ui->tabOptions, SIGNAL(setPitchGuide(TiaSound::PitchGuide*)), ui->trackEditor, SLOT(setPitchGuide(TiaSound::PitchGuide*)));
     QObject::connect(ui->spinBoxOffTuneThreshold, SIGNAL(valueChanged(int)), ui->pianoKeyboard, SLOT(setOffThreshold(int)));
-    QObject::connect(ui->tabOptions, SIGNAL(setOffTuneThreshold(int)), ui->pianoKeyboard, SLOT(setOffThreshold(int)));
     QObject::connect(ui->pushButtonGuideCreate, SIGNAL(clicked(bool)), ui->tabOptions, SLOT(on_pushButtonGuideCreate_clicked(bool)));
     QObject::connect(ui->pushButtonGuideExport, SIGNAL(clicked(bool)), ui->tabOptions, SLOT(on_pushButtonGuideExport_clicked(bool)));
     QObject::connect(ui->pushButtonGuideImport, SIGNAL(clicked(bool)), ui->tabOptions, SLOT(on_pushButtonGuideImport_clicked(bool)));
