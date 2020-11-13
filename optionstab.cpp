@@ -72,17 +72,23 @@ void OptionsTab::updateOptionsTab() {
     rbNtsc->blockSignals(false);
     // Meta data
     QLineEdit *leAuthor = findChild<QLineEdit *>("lineEditAuthor");
-    leAuthor->blockSignals(true);
-    leAuthor->setText(pTrack->metaAuthor);
-    leAuthor->blockSignals(false);
+    if (!leAuthor->hasFocus()) {
+        leAuthor->blockSignals(true);
+        leAuthor->setText(pTrack->metaAuthor);
+        leAuthor->blockSignals(false);
+    }
     QLineEdit *leSongName = findChild<QLineEdit *>("lineEditSongName");
-    leSongName->blockSignals(true);
-    leSongName->setText(pTrack->metaName);
-    leSongName->blockSignals(false);
+    if (!leSongName->hasFocus()) {
+        leSongName->blockSignals(true);
+        leSongName->setText(pTrack->metaName);
+        leSongName->blockSignals(false);
+    }
     QPlainTextEdit *te = findChild<QPlainTextEdit *>("plainTextEditComment");
-    te->blockSignals(true);
-    te->setPlainText(pTrack->metaComment);
-    te->blockSignals(false);
+    if (!te->hasFocus()) {
+        te->blockSignals(true);
+        te->setPlainText(pTrack->metaComment);
+        te->blockSignals(false);
+    }
 
     // Pitch guide
     QLabel *infoLabel = findChild<QLabel *>("labelGuideInfo");
@@ -313,4 +319,6 @@ void OptionsTab::on_plainTextEditComment_textChanged() {
 void OptionsTab::on_text_editingFinished()
 {
     SetStringCommand::ToggleID();
+
+    setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
 }
