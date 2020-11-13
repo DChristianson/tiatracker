@@ -249,6 +249,10 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
 {
     statusBar()->showMessage((undo?"Undone: ":"Done: ") + text);
 
+    // options first for pitch guide
+    if (ci.optionsTab)
+        ui->tabOptions->updateOptionsTab();
+
     int editPos = undo ? ci.editPosFrom : ci.editPosTo;
 
     if (editPos != -1) {
@@ -265,8 +269,6 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
     else if (ci.trackStats)
         ui->tabTrack->updateTrackStats();
 
-    if (ci.optionsTab)
-        ui->tabOptions->updateOptionsTab();
     update();
 }
 
@@ -544,6 +546,11 @@ void MainWindow::setTrackName(QString name) {
 /*************************************************************************/
 
 void MainWindow::updateAllTabs() {
+
+    // options first for pitch guide
+    OptionsTab *optionsTab = findChild<OptionsTab *>("tabOptions");
+    optionsTab->updateOptionsTab();
+
     TrackTab *trackTab = findChild<TrackTab *>("tabTrack");
     trackTab->updateTrackTab();
 
@@ -552,9 +559,6 @@ void MainWindow::updateAllTabs() {
 
     PercussionTab *percTab = findChild<PercussionTab *>("tabPercussion");
     percTab->updatePercussionTab();
-
-    OptionsTab *optionsTab = findChild<OptionsTab *>("tabOptions");
-    optionsTab->updateOptionsTab();
 
     InstrumentSelector *insSel = findChild<InstrumentSelector *>("trackInstrumentSelector");
     insSel->setSelectedInstrument(0);
