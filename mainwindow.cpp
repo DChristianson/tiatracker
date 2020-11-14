@@ -428,19 +428,27 @@ void MainWindow::waveformContextEvent(int frame) {
 void MainWindow::insertFrameBefore(bool) {
     switch (ui->tabWidget->currentIndex()) {
     case iTabInstruments: {
-        Track::Instrument *ins = ui->tabInstruments->getSelectedInstrument();
-        ins->insertFrameBefore(waveformContextFrame);
-        ui->tabInstruments->updateInstrumentsTab();
-        ui->tabInstruments->update();
+            Track::Instrument *curInstrument = ui->tabInstruments->getSelectedInstrument();
+            Track::Instrument inst = *curInstrument;
+            inst.insertFrameBefore(waveformContextFrame);
+            auto cmd = new SetInstrumentCommand(pTrack, ui->tabInstruments->getSelectedInstrumentIndex(), std::move(inst));
+            cmd->setText("Insert frame before in instrument");
+            cmd->post = pTabsUpdate;
+            cmd->ci.instrumentTab = true;
+            pUndoStack->push(cmd);
+        }
         break;
-    }
     case iTabPercussion: {
-        Track::Percussion *perc = ui->tabPercussion->getSelectedPercussion();
-        perc->insertFrameBefore(waveformContextFrame);
-        ui->tabPercussion->updatePercussionTab();
-        ui->tabPercussion->update();
+            Track::Percussion *curPercussion = ui->tabPercussion->getSelectedPercussion();
+            Track::Percussion perc = *curPercussion;
+            perc.insertFrameBefore(waveformContextFrame);
+            auto cmd = new SetPercussionCommand(pTrack, ui->tabPercussion->getSelectedPercussionIndex(), std::move(perc));
+            cmd->setText("Insert frame before in percussion");
+            cmd->post = pTabsUpdate;
+            cmd->ci.percussionTab = true;
+            pUndoStack->push(cmd);
+        }
         break;
-    }
     default:
         break;
     }
@@ -451,19 +459,27 @@ void MainWindow::insertFrameBefore(bool) {
 void MainWindow::insertFrameAfter(bool) {
     switch (ui->tabWidget->currentIndex()) {
     case iTabInstruments: {
-        Track::Instrument *ins = ui->tabInstruments->getSelectedInstrument();
-        ins->insertFrameAfter(waveformContextFrame);
-        ui->tabInstruments->updateInstrumentsTab();
-        ui->tabInstruments->update();
+            Track::Instrument *curInstrument = ui->tabInstruments->getSelectedInstrument();
+            Track::Instrument inst = *curInstrument;
+            inst.insertFrameAfter(waveformContextFrame);
+            auto cmd = new SetInstrumentCommand(pTrack, ui->tabInstruments->getSelectedInstrumentIndex(), std::move(inst));
+            cmd->setText("Insert frame after in instrument");
+            cmd->post = pTabsUpdate;
+            cmd->ci.instrumentTab = true;
+            pUndoStack->push(cmd);
+        }
         break;
-    }
     case iTabPercussion: {
-        Track::Percussion *perc = ui->tabPercussion->getSelectedPercussion();
-        perc->insertFrameAfter(waveformContextFrame);
-        ui->tabPercussion->updatePercussionTab();
-        ui->tabPercussion->update();
+            Track::Percussion *curPercussion = ui->tabPercussion->getSelectedPercussion();
+            Track::Percussion perc = *curPercussion;
+            perc.insertFrameAfter(waveformContextFrame);
+            auto cmd = new SetPercussionCommand(pTrack, ui->tabPercussion->getSelectedPercussionIndex(), std::move(perc));
+            cmd->setText("Insert frame after in percussion");
+            cmd->post = pTabsUpdate;
+            cmd->ci.percussionTab = true;
+            pUndoStack->push(cmd);
+        }
         break;
-    }
     default:
         break;
     }
@@ -474,19 +490,27 @@ void MainWindow::insertFrameAfter(bool) {
 void MainWindow::deleteFrame(bool) {
     switch (ui->tabWidget->currentIndex()) {
     case iTabInstruments: {
-        Track::Instrument *ins = ui->tabInstruments->getSelectedInstrument();
-        ins->deleteFrame(waveformContextFrame);
-        ui->tabInstruments->updateInstrumentsTab();
-        ui->tabInstruments->update();
+            Track::Instrument *curInstrument = ui->tabInstruments->getSelectedInstrument();
+            Track::Instrument inst = *curInstrument;
+            inst.deleteFrame(waveformContextFrame);
+            auto cmd = new SetInstrumentCommand(pTrack, ui->tabInstruments->getSelectedInstrumentIndex(), std::move(inst));
+            cmd->setText("Delete frame in instrument");
+            cmd->post = pTabsUpdate;
+            cmd->ci.instrumentTab = true;
+            pUndoStack->push(cmd);
+        }
         break;
-    }
     case iTabPercussion: {
-        Track::Percussion *perc = ui->tabPercussion->getSelectedPercussion();
-        perc->deleteFrame(waveformContextFrame);
-        ui->tabPercussion->updatePercussionTab();
-        ui->tabPercussion->update();
+            Track::Percussion *curPercussion = ui->tabPercussion->getSelectedPercussion();
+            Track::Percussion perc = *curPercussion;
+            perc.deleteFrame(waveformContextFrame);
+            auto cmd = new SetPercussionCommand(pTrack, ui->tabPercussion->getSelectedPercussionIndex(), std::move(perc));
+            cmd->setText("Delete frame in percussion");
+            cmd->post = pTabsUpdate;
+            cmd->ci.percussionTab = true;
+            pUndoStack->push(cmd);
+        }
         break;
-    }
     default:
         break;
     }
