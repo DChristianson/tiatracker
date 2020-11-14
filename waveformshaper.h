@@ -27,10 +27,10 @@ public:
     /* Set fixed size for layout according to envelope length */
     void updateSize();
 
-    QList<TiaSound::Distortion> *getValues();
-    void setValues(QList<TiaSound::Distortion> *newValues);
+    void setValues(QList<TiaSound::Distortion> newValues);
 
 signals:
+    void valuesChanged(const QList<TiaSound::Distortion>&);
 
 public slots:
     void setWaveform(QAction *action);
@@ -51,7 +51,7 @@ private:
     // The percussion to edit
     Track::Percussion *pPercussion = nullptr;
 
-    QList<TiaSound::Distortion> *values = nullptr;
+    QList<TiaSound::Distortion> values;
 
     static const int valueFontSize = 11;
     static const int valueAreaMargin = 2;

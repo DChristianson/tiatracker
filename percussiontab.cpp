@@ -68,7 +68,8 @@ void PercussionTab::initPercussionTab() {
     vs->registerPercussion(&(pTrack->percussion[0]));
     vs->name = "Volume";
     vs->setScale(0, 15);
-    vs->setValues(&(pTrack->percussion[0].volumes));
+    vs->setValues(pTrack->percussion[0].volumes);
+    QObject::connect(vs, SIGNAL(valuesChanged(const QList<int>&)), this, SLOT(volumeChanged(const QList<int>&)));
 
     // Frequency shaper
     PercussionShaper *fs = findChild<PercussionShaper *>("percussionFrequencyShaper");
@@ -76,12 +77,14 @@ void PercussionTab::initPercussionTab() {
     fs->name = "Frequency";
     fs->setScale(0, 31);
     fs->isInverted = true;
-    fs->setValues(&(pTrack->percussion[0].frequencies));
+    fs->setValues(pTrack->percussion[0].frequencies);
+    QObject::connect(fs, SIGNAL(valuesChanged(const QList<int>&)), this, SLOT(frequencyChanged(const QList<int>&)));
 
     // Waveform shaper
     WaveformShaper *ws = findChild<WaveformShaper *>("percussionWaveformShaper");
     ws->registerPercussion(&(pTrack->percussion[0]));
-    ws->setValues(&(pTrack->percussion[0].waveforms));
+    ws->setValues(pTrack->percussion[0].waveforms);
+    QObject::connect(ws, SIGNAL(valuesChanged(const QList<TiaSound::Distortion>&)), this, SLOT(waveformChanged(const QList<TiaSound::Distortion>&)));
 }
 
 /*************************************************************************/
@@ -141,15 +144,15 @@ void PercussionTab::updatePercussionTab() {
     // PercussionShaper sizes and values
     PercussionShaper *psVolume = findChild<PercussionShaper *>("percussionVolumeShaper");
     psVolume->registerPercussion(&curPercussion);
-    psVolume->setValues(&(curPercussion.volumes));
+    psVolume->setValues(curPercussion.volumes);
     psVolume->updateSize();
     PercussionShaper *psFrequency = findChild<PercussionShaper *>("percussionFrequencyShaper");
     psFrequency->registerPercussion(&curPercussion);
-    psFrequency->setValues(&(curPercussion.frequencies));
+    psFrequency->setValues(curPercussion.frequencies);
     psFrequency->updateSize();
     WaveformShaper *wsWaveforms = findChild<WaveformShaper *>("percussionWaveformShaper");
     wsWaveforms->registerPercussion(&curPercussion);
-    wsWaveforms->setValues(&(curPercussion.waveforms));
+    wsWaveforms->setValues(curPercussion.waveforms);
     wsWaveforms->updateSize();
 }
 
@@ -464,4 +467,70 @@ void PercussionTab::on_comboBoxPercussion_editingFinished()
     }
 
     setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
+}
+
+/*************************************************************************/
+
+void PercussionTab::volumeChanged(const QList<int>& volumes)
+{
+    Track::Percussion *curPercussion = getSelectedPercussion();
+    
+    Track::Percussion perc = *curPercussion;
+    perc.volumes = volumes;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Edit Percussion Volumes");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
+}
+
+/*************************************************************************/
+
+void PercussionTab::frequencyChanged(const QList<int>& frequencies)
+{
+    Track::Percussion *curPercussion = getSelectedPercussion();
+
+    Track::Percussion perc = *curPercussion;
+    perc.frequencies = frequencies;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Edit Percussion Frequencies");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
+}
+
+/*************************************************************************/
+
+void PercussionTab::waveformChanged(const QList<TiaSound::Distortion>& waveforms)
+{
+    Track::Percussion *curPercussion = getSelectedPercussion();
+
+    Track::Percussion perc = *curPercussion;
+    perc.waveforms = waveforms;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Edit Percussion Frequencies");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
 }

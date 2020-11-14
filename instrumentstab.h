@@ -58,6 +58,9 @@ public slots:
     void on_comboBoxInstruments_editTextChanged(const QString &text);
     void on_comboBoxInstruments_editingFinished();
 
+    void volumesChanged(const QList<int>& volumes);
+    void frequenciesChanged(const QList<int>& frequencies);
+
 protected:
 
 private:

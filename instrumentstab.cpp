@@ -70,7 +70,8 @@ void InstrumentsTab::initInstrumentsTab() {
     vs->registerInstrument(&(pTrack->instruments[0]));
     vs->name = "Volume";
     vs->setScale(0, 15);
-    vs->setValues(&(pTrack->instruments[0].volumes));
+    vs->setValues(pTrack->instruments[0].volumes);
+    QObject::connect(vs, SIGNAL(valuesChanged(const QList<int>&)), this, SLOT(volumesChanged(const QList<int>&)));
 
     // Frequency shaper
     EnvelopeShaper *fs = findChild<EnvelopeShaper *>("frequencyShaper");
@@ -78,7 +79,8 @@ void InstrumentsTab::initInstrumentsTab() {
     fs->name = "Frequency";
     fs->setScale(-8, 7);
     fs->isInverted = true;
-    fs->setValues(&(pTrack->instruments[0].frequencies));
+    fs->setValues(pTrack->instruments[0].frequencies);
+    QObject::connect(fs, SIGNAL(valuesChanged(const QList<int>&)), this, SLOT(frequenciesChanged(const QList<int>&)));
 }
 
 /*************************************************************************/
@@ -161,11 +163,11 @@ void InstrumentsTab::updateInstrumentsTab() {
     // EnvelopeShaper sizes and values
     EnvelopeShaper *wsVolume = findChild<EnvelopeShaper *>("volumeShaper");
     wsVolume->registerInstrument(&curInstrument);
-    wsVolume->setValues(&(curInstrument.volumes));
+    wsVolume->setValues(curInstrument.volumes);
     wsVolume->updateSize();
     EnvelopeShaper *wsFrequency = findChild<EnvelopeShaper *>("frequencyShaper");
     wsFrequency->registerInstrument(&curInstrument);
-    wsFrequency->setValues(&(curInstrument.frequencies));
+    wsFrequency->setValues(curInstrument.frequencies);
     wsFrequency->updateSize();
 }
 
@@ -546,4 +548,48 @@ void InstrumentsTab::on_comboBoxInstruments_editingFinished()
     }
 
     setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
+}
+
+/*************************************************************************/
+
+void InstrumentsTab::volumesChanged(const QList<int>& volumes)
+{
+    Track::Instrument *curInstrument = getSelectedInstrument();
+
+    Track::Instrument inst = *curInstrument;
+    inst.volumes = volumes;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Edit Instrument Volumes");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
+}
+
+/*************************************************************************/
+
+void InstrumentsTab::frequenciesChanged(const QList<int>& frequencies)
+{
+    Track::Instrument *curInstrument = getSelectedInstrument();
+
+    Track::Instrument inst = *curInstrument;
+    inst.frequencies = frequencies;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst));
+
+    cmd->setText("Edit Instrument Frequencies");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.instrumentTab = true;
+
+    undoStack->push(cmd);
 }

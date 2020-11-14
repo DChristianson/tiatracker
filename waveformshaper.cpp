@@ -47,11 +47,7 @@ void WaveformShaper::updateSize() {
 
 /*************************************************************************/
 
-QList<TiaSound::Distortion> *WaveformShaper::getValues() {
-    return values;
-}
-
-void WaveformShaper::setValues(QList<TiaSound::Distortion> *newValues) {
+void WaveformShaper::setValues(QList<TiaSound::Distortion> newValues) {
     values = newValues;
     updateSize();
 }
@@ -67,7 +63,7 @@ void WaveformShaper::setWaveform(QAction *action) {
         }
     }
     // Set distortion column
-    (*values)[waveformColumn] = distortionPen;
+    values[waveformColumn] = distortionPen;
     update();
 }
 
@@ -94,7 +90,7 @@ void WaveformShaper::paintEvent(QPaintEvent *) {
     // Values
     painter.setPen(MainWindow::contentLight);
     for (int iValue = 0; iValue < envelopeLength; ++iValue) {
-        TiaSound::Distortion value = (*values)[iValue];
+        TiaSound::Distortion value = values[iValue];
         int intValue = TiaSound::getDistortionInt(value);
         painter.drawText(legendCellSize + iValue*cellWidth, valueAreaMargin, cellWidth, valueFontHeight, Qt::AlignCenter, QString::number(intValue));
     }
@@ -116,8 +112,9 @@ void WaveformShaper::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         if (event->x() >= legendCellSize && event->y() < valueAreaHeight) {
            int column = (event->x() - legendCellSize)/cellWidth;
-           (*values)[column] = distortionPen;
+           values[column] = distortionPen;
            update();
+           emit valuesChanged(values);
         }
     }
 }
@@ -129,13 +126,14 @@ void WaveformShaper::wheelEvent(QWheelEvent *event) {
         int column = (event->x() - legendCellSize)/cellWidth;
         int delta = event->delta()/100;
         // Get index of current waveform
-        TiaSound::Distortion oldDist = (*values)[column];
+        TiaSound::Distortion oldDist = values[column];
         int oldIndex = PercussionTab::availableWaveforms.indexOf(oldDist);
         int newIndex = oldIndex + delta;
         newIndex = std::max(newIndex, 0);
         newIndex = std::min(newIndex, PercussionTab::availableWaveforms.size() - 1);
-        (*values)[column] = PercussionTab::availableWaveforms[newIndex];
+        values[column] = PercussionTab::availableWaveforms[newIndex];
         update();
+        emit valuesChanged(values);
     }
 }
 
@@ -148,7 +146,7 @@ int WaveformShaper::calcWidth() {
         envelopeLength = pPercussion->getEnvelopeLength();
     }
     int width = legendCellSize;
-    if (values != nullptr) {
+    if (!values.empty()) {
         width += envelopeLength*cellWidth;
     }
     return width;

@@ -62,6 +62,10 @@ public slots:
 
     void newPercussionValue(int iFrame);
 
+    void volumeChanged(const QList<int>& volumes);
+    void frequencyChanged(const QList<int>& frequencies);
+    void waveformChanged(const QList<TiaSound::Distortion>& waveforms);
+
 protected:
 
 private:

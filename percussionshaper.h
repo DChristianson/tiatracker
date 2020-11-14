@@ -35,8 +35,7 @@ public:
 
     /* Getters/Setters */
     void setScale(int min, int max);
-    QList<int> *getValues();
-    void setValues(QList<int> *newValues);
+    void setValues(const QList<int> &newValues);
 
     QString name{};
     // Invert y axis
@@ -54,6 +53,8 @@ signals:
 
     /* Gets emitted when a context menu is opened at a valid frame */
     void envelopeContextEvent(int frame);
+
+    void valuesChanged(const QList<int>&);
 
 public slots:
 
@@ -80,7 +81,7 @@ private:
 
     int scaleMin = 0;
     int scaleMax = 15;
-    QList<int> *values = nullptr;
+    QList<int> values;
     int cellHeight;
     bool isMouseDragging = false;
     int draggingIndex = -1;

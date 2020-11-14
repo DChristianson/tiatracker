@@ -82,14 +82,14 @@ void PercussionShaper::drawWaveform(QPainter &painter, const int valuesXPos) {
     // Value numbers
     painter.setPen(MainWindow::contentLight);
     for (int iValue = 0; iValue < envelopeLength; ++iValue) {
-        int value = (*values)[iValue];
+        int value = values[iValue];
         painter.drawText(valuesXPos + iValue*cellWidth, 0, cellWidth, legendCellSize, Qt::AlignCenter, QString::number(value));
     }
     // Value circles
     painter.setPen(MainWindow::contentLight);
     for (int i = 0; i < envelopeLength; ++i) {
         int xPos = int(valuesXPos + i*cellWidth + cellWidth/2);
-        int deviceValue = scaleMax - (*values)[i];
+        int deviceValue = scaleMax - values[i];
         if (isInverted) {
             deviceValue = scaleMax - scaleMin - deviceValue;
         }
@@ -100,13 +100,13 @@ void PercussionShaper::drawWaveform(QPainter &painter, const int valuesXPos) {
     painter.setPen(QPen(MainWindow::blue, 2, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
     for (int i = 1; i < envelopeLength; ++i) {
         int fromX = int(valuesXPos + (i - 1)*cellWidth + cellWidth/2);
-        int deviceValueFrom = scaleMax - (*values)[i - 1];
+        int deviceValueFrom = scaleMax - values[i - 1];
         if (isInverted) {
             deviceValueFrom = scaleMax - scaleMin - deviceValueFrom;
         }
         int fromY = int(deviceValueFrom*cellHeight + cellHeight/2);
         int toX = int(valuesXPos + i*cellWidth + cellWidth/2);
-        int deviceValueTo = scaleMax - (*values)[i];
+        int deviceValueTo = scaleMax - values[i];
         if (isInverted) {
             deviceValueTo = scaleMax - scaleMin - deviceValueTo;
         }
@@ -150,10 +150,10 @@ void PercussionShaper::processMouseEvent(int x, int y) {
                 newValue = scaleMin + scaleMax - newValue;
             }
             bool isNew = false;
-            if ((*values)[iValue] != newValue) {
+            if (values[iValue] != newValue) {
                 isNew = true;
             }
-            (*values)[iValue] = newValue;
+            values[iValue] = newValue;
             draggingIndex = iValue;
             if (isNew) {
                 emit newPercussionValue(iValue);
@@ -176,6 +176,7 @@ void PercussionShaper::mouseReleaseEvent(QMouseEvent *) {
     int newMax = pPercussion->getMaxVolume();
     emit newMaxValue(newMax);
     emit silence();
+    emit valuesChanged(values);
 }
 
 void PercussionShaper::mouseMoveEvent(QMouseEvent *event) {
@@ -204,7 +205,7 @@ int PercussionShaper::calcWidth() {
         envelopeLength = pPercussion->getEnvelopeLength();
     }
     int width = legendCellSize;
-    if (values != nullptr) {
+    if (!values.empty()) {
         width += envelopeLength*cellWidth;
     }
     return width;
@@ -218,11 +219,7 @@ void PercussionShaper::updateSize() {
 
 /*************************************************************************/
 
-QList<int>* PercussionShaper::getValues() {
-    return values;
-}
-
-void PercussionShaper::setValues(QList<int> *newValues) {
+void PercussionShaper::setValues(const QList<int>& newValues) {
     values = newValues;
     updateSize();
 }

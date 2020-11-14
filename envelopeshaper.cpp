@@ -96,14 +96,14 @@ void EnvelopeShaper::drawWaveform(QPainter &painter, const int valuesXPos) {
     // Value numbers
     painter.setPen(MainWindow::contentLight);
     for (int iValue = 0; iValue < envelopeLength; ++iValue) {
-        int value = (*values)[iValue];
+        int value = values[iValue];
         painter.drawText(valuesXPos + iValue*cellWidth, 0, cellWidth, legendCellSize, Qt::AlignCenter, QString::number(value));
     }
     // Value circles
     painter.setPen(MainWindow::contentLight);
     for (int i = 0; i < envelopeLength; ++i) {
         int xPos = int(valuesXPos + i*cellWidth + cellWidth/2);
-        int deviceValue = scaleMax - (*values)[i];
+        int deviceValue = scaleMax - values[i];
         if (isInverted) {
             deviceValue = scaleMax - scaleMin - deviceValue;
         }
@@ -114,13 +114,13 @@ void EnvelopeShaper::drawWaveform(QPainter &painter, const int valuesXPos) {
     painter.setPen(QPen(MainWindow::blue, 2, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
     for (int i = 1; i < envelopeLength; ++i) {
         int fromX = int(valuesXPos + (i - 1)*cellWidth + cellWidth/2);
-        int deviceValueFrom = scaleMax - (*values)[i - 1];
+        int deviceValueFrom = scaleMax - values[i - 1];
         if (isInverted) {
             deviceValueFrom = scaleMax - scaleMin - deviceValueFrom;
         }
         int fromY = int(deviceValueFrom*cellHeight + cellHeight/2);
         int toX = int(valuesXPos + i*cellWidth + cellWidth/2);
-        int deviceValueTo = scaleMax - (*values)[i];
+        int deviceValueTo = scaleMax - values[i];
         if (isInverted) {
             deviceValueTo = scaleMax - scaleMin - deviceValueTo;
         }
@@ -160,7 +160,7 @@ void EnvelopeShaper::processMouseEvent(int x, int y) {
             if (isInverted) {
                 newValue = scaleMin + scaleMax - newValue;
             }
-            (*values)[iValue] = newValue;
+            values[iValue] = newValue;
             draggingIndex = iValue;
             update();
         }
@@ -179,6 +179,7 @@ void EnvelopeShaper::mouseReleaseEvent(QMouseEvent *) {
     draggingIndex = -1;
     int newMax = pInstrument->getMaxVolume();
     emit newMaxValue(newMax);
+    emit valuesChanged(values);
 }
 
 void EnvelopeShaper::mouseMoveEvent(QMouseEvent *event) {
@@ -207,7 +208,7 @@ int EnvelopeShaper::calcWidth() {
         envelopeLength = pInstrument->getEnvelopeLength();
     }
     int width = legendCellSize;
-    if (values != nullptr) {
+    if (!values.empty()) {
         width += envelopeLength*cellWidth;
     }
     return width;
@@ -221,11 +222,7 @@ void EnvelopeShaper::updateSize() {
 
 /*************************************************************************/
 
-QList<int>* EnvelopeShaper::getValues() {
-    return values;
-}
-
-void EnvelopeShaper::setValues(QList<int> *newValues) {
+void EnvelopeShaper::setValues(const QList<int> &newValues) {
     values = newValues;
     updateSize();
 }
