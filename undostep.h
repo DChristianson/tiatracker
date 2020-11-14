@@ -11,6 +11,7 @@ struct commandInfo {
     bool trackTab = false;
     bool optionsTab = false;
     bool instrumentTab = false;
+    bool percussionTab = false;
 };
 
 class UndoStep : public QObject

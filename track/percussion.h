@@ -33,8 +33,6 @@ public:
     void toJson(QJsonObject &json);
     bool import(const QJsonObject &json);
 
-    void deletePercussion();
-
     /* Get minimum volume over the whole envelope */
     int getMinVolume();
 
@@ -54,6 +52,9 @@ public:
     QList<int> frequencies{0};
     QList<TiaSound::Distortion> waveforms{TiaSound::Distortion::WHITE_NOISE};
     bool overlay = false;
+
+    // cannot be defaulted before C++20
+    bool operator==(const Percussion& other) const;
 
 private:
     int envelopeLength = 1;

@@ -302,27 +302,51 @@ public:
     void do_redo() final;
 };
 
-class SetInstrumentCommand : public TrackCommand
+// IP: Instrument or Percussion
+// ids for mergeable commands:
+//    - ids 0 and 1 are for SetStringCommand
+//    - ids 2 and 3 are for SetInstrumentCommand
+//    - ids 4 and 5 are for SetPercussionCommand
+template<class IP> 
+class SetAbstractInstrumentCommand : public TrackCommand
 {
+protected:
     int iInstrumentIndex;
-    Track::Instrument newInstrument;
-    Track::Instrument oldInstrument;
+    IP newInstrument;
+    IP oldInstrument;
+
+private:
     bool bMergeable;
 
-    int _id;
-    static bool ID;
+    // mutable and const below for lazy init of _id
+    mutable int _id;
+    virtual int init_id() const = 0;
 
 public:
-    SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument,
-        bool mergeable = false);
+    SetAbstractInstrumentCommand(Track::Track* track, int instrumentIndex, IP&& instrument, const IP& currInstrument,
+        bool mergeable) :
+        TrackCommand(track, "", nullptr),
+        iInstrumentIndex(instrumentIndex),
+        newInstrument(instrument),
+        oldInstrument(currInstrument),
+        bMergeable(mergeable),
+        _id(-1)
+    {
+    }
 
-    int id() const final { return bMergeable ? _id : -1; }
+    int id() const final {
+        if (!bMergeable)
+            return -1;
+        if (_id == -1)
+            _id = init_id(); // lazy init of _id because we can't call init_id from the ctor
+        return _id;
+    }
 
     bool mergeWith(const QUndoCommand *other) final
     {
         if (other->id() != id())
             return false;
-        auto other_like_me = dynamic_cast<const SetInstrumentCommand*>(other);
+        auto other_like_me = dynamic_cast<const SetAbstractInstrumentCommand<IP>*>(other);
         assert(other_like_me != nullptr);
         if (iInstrumentIndex != other_like_me->iInstrumentIndex)
             return false; // target mismatch
@@ -331,6 +355,41 @@ public:
             setObsolete(true);
         return true; // other will be deleted
     }
+};
+
+class SetInstrumentCommand : public SetAbstractInstrumentCommand<Track::Instrument>
+{
+    static bool ID;
+
+    int init_id() const final {
+        return int(ID) + 2;
+    }
+
+public:
+    SetInstrumentCommand(Track::Track* track, int instrumentIndex, Track::Instrument&& instrument,
+        bool mergeable = false) :
+        SetAbstractInstrumentCommand<Track::Instrument>(track, instrumentIndex, std::move(instrument), track->instruments[instrumentIndex], mergeable)
+    {}
+
+    void do_undo() final;
+    void do_redo() final;
+
+    static void ToggleID() { ID = !ID; }
+};
+
+class SetPercussionCommand : public SetAbstractInstrumentCommand<Track::Percussion>
+{
+    static bool ID;
+
+    int init_id() const final {
+        return int(ID) + 4;
+    }
+
+public:
+    SetPercussionCommand(Track::Track* track, int percussionIndex, Track::Percussion&& percussion,
+        bool mergeable = false) :
+        SetAbstractInstrumentCommand<Track::Percussion>(track, percussionIndex, std::move(percussion), track->percussion[percussionIndex], mergeable)
+    {}
 
     void do_undo() final;
     void do_redo() final;

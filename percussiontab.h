@@ -50,16 +50,15 @@ public slots:
     void on_buttonPercussionImport_clicked();
     void on_buttonPercussionDelete_clicked();
 
-    void on_spinBoxPercussionLength_editingFinished();
     void on_spinBoxPercussionLength_valueChanged(int newLength);
 
     void on_checkBoxOverlay_stateChanged(int);
 
-    void on_spinBoxPercussionVolume_editingFinished();
     void on_spinBoxPercussionVolume_valueChanged(int newVolume);
 
     void on_comboBoxPercussion_currentIndexChanged(int);
-    void on_comboBoxPercussion_currentTextChanged(const QString &text);
+    void on_comboBoxPercussion_editTextChanged(const QString &text);
+    void on_comboBoxPercussion_editingFinished();
 
     void newPercussionValue(int iFrame);
 
@@ -68,6 +67,8 @@ protected:
 private:
     Track::Track *pTrack = nullptr;
 
+    bool bStartNameEditing = false;
+    int iStartNameEditCount;
 };
 
 #endif // PERCUSSIONTAB_H

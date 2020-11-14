@@ -105,27 +105,39 @@ void PercussionTab::updatePercussionTab() {
     QString percussionUsedString = "(" + QString::number(percussionUsed) + " of 15 used)";
     lPercussionUsed->setText(percussionUsedString);
     // Names
-    QComboBox *cbPercussion = findChild<QComboBox *>("comboBoxPercussion");
-    for (int perc = 0; perc < pTrack->numPercussion; ++perc) {
-        cbPercussion->setItemText(perc, pTrack->percussion[perc].name);
-    }
-
-    /* Values specific to the selected percussion */
     int iCurPercussion = getSelectedPercussionIndex();
+    QComboBox *cbPercussion = findChild<QComboBox *>("comboBoxPercussion");
+    if (!cbPercussion->lineEdit()->hasFocus()) {
+        cbPercussion->blockSignals(true);
+        for (int perc = 0; perc < pTrack->numPercussion; ++perc) {
+            cbPercussion->setItemText(perc, pTrack->percussion[perc].name);
+        }
+        // special requirement to update a QComboBox
+        // when signals are disabled:
+        cbPercussion->setCurrentIndex(iCurPercussion);
+        cbPercussion->blockSignals(false);
+    }
+    /* Values specific to the selected percussion */
     QLabel *lPercussionNumber = findChild<QLabel *>("labelPercussionNumber");
     lPercussionNumber->setText("Percussion " + QString::number(iCurPercussion + 1));
     Track::Percussion& curPercussion = pTrack->percussion[iCurPercussion];
     // Envelope length
     QSpinBox *spPercussionLength = findChild<QSpinBox *>("spinBoxPercussionLength");
     int envelopeLength = curPercussion.getEnvelopeLength();
+    spPercussionLength->blockSignals(true);
     spPercussionLength->setValue(envelopeLength);
+    spPercussionLength->blockSignals(false);
     // Peak volume
     QSpinBox *spPeakVolume = findChild<QSpinBox *>("spinBoxPercussionVolume");
     int maxVolume = curPercussion.getMaxVolume();
+    spPeakVolume->blockSignals(true);
     spPeakVolume->setValue(maxVolume);
+    spPeakVolume->blockSignals(false);
     // Overlay
     QCheckBox *cpOverlay = findChild<QCheckBox *>("checkBoxOverlay");
+    cpOverlay->blockSignals(true);
     cpOverlay->setChecked(curPercussion.overlay);
+    cpOverlay->blockSignals(false);
     // PercussionShaper sizes and values
     PercussionShaper *psVolume = findChild<PercussionShaper *>("percussionVolumeShaper");
     psVolume->registerPercussion(&curPercussion);
@@ -245,15 +257,26 @@ void PercussionTab::on_buttonPercussionImport_clicked() {
     }
     QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
 
+    Track::Percussion perc(curPercussion->name);
     // Parse in data
-    if (!curPercussion->import(loadDoc.object())) {
+    if (!perc.import(loadDoc.object())) {
         MainWindow::displayMessage("Unable to parse percussion!");
         return;
     }
-    // Update display
-    updatePercussionTab();
-    update();
 
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    QString percName = perc.name;
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Import Percussion " + percName);
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
@@ -280,76 +303,107 @@ void PercussionTab::on_buttonPercussionDelete_clicked() {
             doDelete = false;
         }
     }
-    if (doDelete) {
-        pTrack->lock();
-        curPercussion->deletePercussion();
-        pTrack->unlock();
-        updatePercussionTab();
-        update();
-    }
-}
+    if (!doDelete)
+        return;
+    
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
-/*************************************************************************/
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), Track::Percussion("---"));
 
-void PercussionTab::on_spinBoxPercussionLength_editingFinished() {
-    QSpinBox *sb = findChild<QSpinBox *>("spinBoxPercussionLength");
-    int newLength = sb->value();
-    Track::Percussion *curPercussion = getSelectedPercussion();
-    pTrack->lock();
-    curPercussion->setEnvelopeLength(newLength);
-    pTrack->unlock();
-    updatePercussionTab();
-    update();
+    cmd->setText("Delete Percussion " + curPercussion->name);
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
 
 void PercussionTab::on_spinBoxPercussionLength_valueChanged(int newLength) {
     Track::Percussion *curPercussion = getSelectedPercussion();
-    if (std::abs(newLength - curPercussion->getEnvelopeLength()) == 1) {
-        on_spinBoxPercussionLength_editingFinished();
-    }
+    if (std::abs(newLength - curPercussion->getEnvelopeLength()) != 1)
+        return;
+
+    Track::Percussion perc = *curPercussion;
+    perc.setEnvelopeLength(newLength);
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Set Percussion Envelope length");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
 
-void PercussionTab::on_checkBoxOverlay_stateChanged(int) {
-    QCheckBox *cpOverlay = findChild<QCheckBox *>("checkBoxOverlay");
+void PercussionTab::on_checkBoxOverlay_stateChanged(int state) {
+
     Track::Percussion *curPercussion = getSelectedPercussion();
-    curPercussion->overlay = cpOverlay->isChecked();
 
-}
+    Track::Percussion perc = *curPercussion;
+    perc.overlay = state != Qt::Unchecked;
 
-/*************************************************************************/
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
-void PercussionTab::on_spinBoxPercussionVolume_editingFinished() {
-    QSpinBox *sb = findChild<QSpinBox *>("spinBoxPercussionVolume");
-    int newVolume = sb->value();
-    Track::Percussion *curPercussion = getSelectedPercussion();
-    int curMin = curPercussion->getMinVolume();
-    int curMax = curPercussion->getMaxVolume();
-    int curVolumeSpan = curMax - curMin;
-    if (newVolume - curVolumeSpan >= 0) {
-        // Shift volumes
-        int volumeShift = newVolume - curMax;
-        for (int i = 0; i < curPercussion->getEnvelopeLength(); ++i) {
-            curPercussion->volumes[i] += volumeShift;
-        }
-    } else {
-        // Invalid value: Set volume to current max
-        sb->setValue(curPercussion->getMaxVolume());
-    }
-    updatePercussionTab();
-    update();
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Set Percussion Overlay");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
 
 void PercussionTab::on_spinBoxPercussionVolume_valueChanged(int newVolume) {
     Track::Percussion *curPercussion = getSelectedPercussion();
-    if (std::abs(newVolume - curPercussion->getMaxVolume()) == 1) {
-        on_spinBoxPercussionVolume_editingFinished();
+    if (std::abs(newVolume - curPercussion->getMaxVolume()) != 1)
+        return;
+
+    QSpinBox *sb = findChild<QSpinBox *>("spinBoxPercussionVolume");
+
+    Track::Percussion perc = *curPercussion;
+
+    int curMin = perc.getMinVolume();
+    int curMax = perc.getMaxVolume();
+    int curVolumeSpan = curMax - curMin;
+    if (newVolume - curVolumeSpan >= 0) {
+        // Shift volumes
+        int volumeShift = newVolume - curMax;
+        for (int i = 0; i < perc.getEnvelopeLength(); ++i) {
+            perc.volumes[i] += volumeShift;
+        }
     }
+    else {
+        // Invalid value: Set volume to current max
+        sb->blockSignals(true);
+        sb->setValue(perc.getMaxVolume());
+        sb->blockSignals(false);
+        return;
+    }
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc));
+
+    cmd->setText("Set Percussion Volume");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
 }
 
 /*************************************************************************/
@@ -361,11 +415,33 @@ void PercussionTab::on_comboBoxPercussion_currentIndexChanged(int) {
 
 /*************************************************************************/
 
-void PercussionTab::on_comboBoxPercussion_currentTextChanged(const QString &text) {
+void PercussionTab::on_comboBoxPercussion_editTextChanged(const QString &text) {
     Track::Percussion *curPercussion = getSelectedPercussion();
-    curPercussion->name = text;
-    updatePercussionTab();
-    update();
+
+    Track::Percussion perc = *curPercussion;
+    perc.name = text;
+
+    auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    if (!bStartNameEditing) {
+        iStartNameEditCount = undoStack->count();
+        bStartNameEditing = true;
+    }
+
+    auto cmd = new SetPercussionCommand(pTrack, getSelectedPercussionIndex(), std::move(perc),
+        /*mergeable =*/ true);
+
+    cmd->setText("Set Percussion Name");
+
+    cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
+
+    cmd->ci.percussionTab = true;
+
+    undoStack->push(cmd);
+
+    if (undoStack->count() == iStartNameEditCount) {
+        bStartNameEditing = false;
+    }
 }
 
 /*************************************************************************/
@@ -380,3 +456,12 @@ void PercussionTab::newPercussionValue(int iFrame) {
 
 /*************************************************************************/
 
+void PercussionTab::on_comboBoxPercussion_editingFinished()
+{
+    if (bStartNameEditing) {
+        SetPercussionCommand::ToggleID();
+        bStartNameEditing = false;
+    }
+
+    setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
+}

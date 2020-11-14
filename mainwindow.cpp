@@ -106,6 +106,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinBoxSustainStart->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxReleaseStart->findChild<QLineEdit*>()->setReadOnly(true);
     ui->spinBoxInstrumentVolume->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxPercussionLength->findChild<QLineEdit*>()->setReadOnly(true);
+    ui->spinBoxPercussionVolume->findChild<QLineEdit*>()->setReadOnly(true);
 }
 
 /*************************************************************************/
@@ -180,14 +182,13 @@ void MainWindow::initConnections() {
     QObject::connect(ui->buttonPercussionDelete, &QPushButton::clicked, ui->tabPercussion, &PercussionTab::on_buttonPercussionDelete_clicked);
     QObject::connect(ui->buttonPercussionExport, &QPushButton::clicked, ui->tabPercussion, &PercussionTab::on_buttonPercussionExport_clicked);
     QObject::connect(ui->buttonPercussionImport, &QPushButton::clicked, ui->tabPercussion, &PercussionTab::on_buttonPercussionImport_clicked);
-    QObject::connect(ui->spinBoxPercussionLength, &QSpinBox::editingFinished, ui->tabPercussion, &PercussionTab::on_spinBoxPercussionLength_editingFinished);
     QObject::connect(ui->spinBoxPercussionLength, SIGNAL(valueChanged(int)), ui->tabPercussion, SLOT(on_spinBoxPercussionLength_valueChanged(int)));
     QObject::connect(ui->checkBoxOverlay, SIGNAL(stateChanged(int)), ui->tabPercussion, SLOT(on_checkBoxOverlay_stateChanged(int)));
-    QObject::connect(ui->spinBoxPercussionVolume, &QSpinBox::editingFinished, ui->tabPercussion, &PercussionTab::on_spinBoxPercussionVolume_editingFinished);
     QObject::connect(ui->spinBoxPercussionVolume, SIGNAL(valueChanged(int)), ui->tabPercussion, SLOT(on_spinBoxPercussionVolume_valueChanged(int)));
     QObject::connect(ui->percussionVolumeShaper, &PercussionShaper::newMaxValue, ui->spinBoxPercussionVolume, &QSpinBox::setValue);
     QObject::connect(ui->comboBoxPercussion, SIGNAL(currentIndexChanged(int)), ui->tabPercussion, SLOT(on_comboBoxPercussion_currentIndexChanged(int)));
-    QObject::connect(ui->comboBoxPercussion, SIGNAL(currentTextChanged(QString)), ui->tabPercussion, SLOT(on_comboBoxPercussion_currentTextChanged(QString)));
+    QObject::connect(ui->comboBoxPercussion, SIGNAL(editTextChanged(QString)), ui->tabPercussion, SLOT(on_comboBoxPercussion_editTextChanged(QString)));
+    QObject::connect(ui->comboBoxPercussion->lineEdit(), SIGNAL(editingFinished()), ui->tabPercussion, SLOT(on_comboBoxPercussion_editingFinished()));
     QObject::connect(ui->percussionVolumeShaper, SIGNAL(newPercussionValue(int)), ui->tabPercussion, SLOT(newPercussionValue(int)));
     QObject::connect(ui->percussionFrequencyShaper, SIGNAL(newPercussionValue(int)), ui->tabPercussion, SLOT(newPercussionValue(int)));
     QObject::connect(ui->percussionVolumeShaper, SIGNAL(envelopeContextEvent(int)), this, SLOT(waveformContextEvent(int)));
@@ -272,6 +273,9 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
 
     if (ci.instrumentTab)
         ui->tabInstruments->updateInstrumentsTab();
+
+    if (ci.percussionTab)
+        ui->tabPercussion->updatePercussionTab();
 
     update();
 }

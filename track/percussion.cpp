@@ -155,22 +155,6 @@ bool Percussion::import(const QJsonObject &json) {
 
 /*************************************************************************/
 
-void Percussion::deletePercussion() {
-    name = "---";
-    while (volumes.size() > 1) {
-        volumes.removeLast();
-        frequencies.removeLast();
-        waveforms.removeLast();
-    }
-    volumes[0] = 0;
-    frequencies[0] = 0;
-    waveforms[0] = TiaSound::Distortion::WHITE_NOISE;
-    envelopeLength = 1;
-    overlay = false;
-}
-
-/*************************************************************************/
-
 int Percussion::getMinVolume() {
     int min = volumes[0];
     for (int i = 1; i < volumes.size(); ++i) {
@@ -265,6 +249,17 @@ int Percussion::calcEffectiveSize() {
         realSize--;
     }
     return realSize + 1;    // +1 for End byte
+}
+
+/*************************************************************************/
+
+bool Percussion::operator==(const Percussion& other) const {
+    return name == other.name
+        && volumes == other.volumes
+        && frequencies == other.frequencies
+        && waveforms == other.waveforms
+        && envelopeLength == other.envelopeLength
+        && overlay == other.overlay;
 }
 
 }
