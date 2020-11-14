@@ -40,6 +40,9 @@ private:
 
     void addGuide(TiaSound::PitchGuide newGuide);
 
+    bool bStartStringEditing = false;
+    int iStartStringEditCount;
+
 private slots:
 
     void on_radioButtonPal_toggled(bool checked);

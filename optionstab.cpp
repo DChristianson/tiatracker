@@ -268,6 +268,11 @@ void OptionsTab::on_lineEditAuthor_textChanged(const QString newText) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
+    if (!bStartStringEditing) {
+        iStartStringEditCount = undoStack->count();
+        bStartStringEditing = true;
+    }
+
     auto cmd = new SetStringCommand(pTrack, pTrack->metaAuthor, newText);
 
     cmd->setText("Set Author");
@@ -277,6 +282,10 @@ void OptionsTab::on_lineEditAuthor_textChanged(const QString newText) {
     undoStack->push(cmd);
 
     cmd->ci.optionsTab = true;
+
+    if (undoStack->count() == iStartStringEditCount) {
+        bStartStringEditing = false;
+    }
 }
 
 /*************************************************************************/
@@ -284,6 +293,11 @@ void OptionsTab::on_lineEditAuthor_textChanged(const QString newText) {
 void OptionsTab::on_lineEditSongName_textChanged(const QString newText) {
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    if (!bStartStringEditing) {
+        iStartStringEditCount = undoStack->count();
+        bStartStringEditing = true;
+    }
 
     auto cmd = new SetStringCommand(pTrack, pTrack->metaName, newText);
 
@@ -294,6 +308,10 @@ void OptionsTab::on_lineEditSongName_textChanged(const QString newText) {
     undoStack->push(cmd);
 
     cmd->ci.optionsTab = true;
+
+    if (undoStack->count() == iStartStringEditCount) {
+        bStartStringEditing = false;
+    }
 }
 
 /*************************************************************************/
@@ -302,6 +320,11 @@ void OptionsTab::on_plainTextEditComment_textChanged() {
     QPlainTextEdit *te = findChild<QPlainTextEdit *>("plainTextEditComment");
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
+
+    if (!bStartStringEditing) {
+        iStartStringEditCount = undoStack->count();
+        bStartStringEditing = true;
+    }
 
     auto cmd = new SetStringCommand(pTrack, pTrack->metaComment, te->document()->toPlainText());
 
@@ -312,13 +335,20 @@ void OptionsTab::on_plainTextEditComment_textChanged() {
     undoStack->push(cmd);
 
     cmd->ci.optionsTab = true;
+
+    if (undoStack->count() == iStartStringEditCount) {
+        bStartStringEditing = false;
+    }
 }
 
 /*************************************************************************/
 
 void OptionsTab::on_text_editingFinished()
 {
-    SetStringCommand::ToggleID();
+    if (bStartStringEditing) {
+        SetStringCommand::ToggleID();
+        bStartStringEditing = false;
+    }
 
     setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
 }

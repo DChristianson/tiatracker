@@ -515,6 +515,11 @@ void InstrumentsTab::on_comboBoxInstruments_editTextChanged(const QString &text)
 
     auto undoStack = this->window()->findChild<QUndoStack*>("UndoStack");
 
+    if (!bStartNameEditing) {
+        iStartNameEditCount = undoStack->count();
+        bStartNameEditing = true;
+    }
+
     auto cmd = new SetInstrumentCommand(pTrack, getSelectedInstrumentIndex(), std::move(inst),
         /*mergeable =*/ true);
 
@@ -525,13 +530,20 @@ void InstrumentsTab::on_comboBoxInstruments_editTextChanged(const QString &text)
     cmd->ci.instrumentTab = true;
 
     undoStack->push(cmd);
+
+    if (undoStack->count() == iStartNameEditCount) {
+        bStartNameEditing = false;
+    }
 }
 
 /*************************************************************************/
 
 void InstrumentsTab::on_comboBoxInstruments_editingFinished()
 {
-    SetInstrumentCommand::ToggleID();
+    if (bStartNameEditing) {
+        SetInstrumentCommand::ToggleID();
+        bStartNameEditing = false;
+    }
 
     setFocus(); // we want the QLineEdit/QPlainTextEdit that was edited to loose the focus
 }

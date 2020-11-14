@@ -65,6 +65,8 @@ private:
 
     static const QList<TiaSound::Distortion> availableWaveforms;
 
+    bool bStartNameEditing = false;
+    int iStartNameEditCount;
 };
 
 #endif // INSTRUMENTSTAB_H
