@@ -140,7 +140,7 @@ void PatternEditor::setRowsPerBeat(int value) {
     // always post step for status bar update
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.trackTab = true;
+    cmd->ci.tab = MainWindow::iTabTrack;
 
     undoStack->push(cmd);
 }
@@ -169,6 +169,7 @@ void PatternEditor::setRowToInstrument(int frequency) {
     cmd->setText(constructRowString(noteIndex, cmd->newNote()));
 
     // hold gui stuffs in cmd:
+    cmd->ci.tab = MainWindow::iTabTrack;
     cmd->ci.selectedChannel = selectedChannel;
     cmd->ci.editPosFrom = editPos;
     cmd->ci.editPosTo = editPos + 1;

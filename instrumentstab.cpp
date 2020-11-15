@@ -213,7 +213,7 @@ void InstrumentsTab::on_buttonInstrumentDelete_clicked() {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -323,7 +323,7 @@ void InstrumentsTab::on_buttonInstrumentImport_clicked() {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -346,7 +346,7 @@ void InstrumentsTab::on_spinBoxInstrumentEnvelopeLength_valueChanged(int newLeng
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -391,7 +391,7 @@ void InstrumentsTab::on_spinBoxSustainStart_valueChanged(int newStart) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -430,7 +430,7 @@ void InstrumentsTab::on_spinBoxReleaseStart_valueChanged(int newStart) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -473,7 +473,7 @@ void InstrumentsTab::on_spinBoxInstrumentVolume_valueChanged(int newVolume) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -495,7 +495,7 @@ void InstrumentsTab::on_comboBoxWaveforms_currentIndexChanged(int index) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -529,7 +529,7 @@ void InstrumentsTab::on_comboBoxInstruments_editTextChanged(const QString &text)
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 
@@ -567,7 +567,7 @@ void InstrumentsTab::volumesChanged(const QList<int>& volumes)
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }
@@ -589,7 +589,7 @@ void InstrumentsTab::frequenciesChanged(const QList<int>& frequencies)
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.instrumentTab = true;
+    cmd->ci.tab = MainWindow::iTabInstruments;
 
     undoStack->push(cmd);
 }

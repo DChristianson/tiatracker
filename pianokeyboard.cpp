@@ -191,7 +191,7 @@ void PianoKeyboard::setOffThreshold(int value) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.optionsTab = true;
+    cmd->ci.tab = MainWindow::iTabOptions;
 
     undoStack->push(cmd);
 }

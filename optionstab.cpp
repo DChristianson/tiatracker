@@ -139,7 +139,7 @@ void OptionsTab::on_comboBoxPitchGuide_currentIndexChanged(int index) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.optionsTab = true;
+    cmd->ci.tab = MainWindow::iTabOptions;
 
     undoStack->push(cmd);
 }
@@ -158,7 +158,7 @@ void OptionsTab::on_radioButtonPal_toggled(bool checked) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
     
-    cmd->ci.optionsTab = true;
+    cmd->ci.tab = MainWindow::iTabOptions;
 
     undoStack->push(cmd);
 }
@@ -281,7 +281,7 @@ void OptionsTab::on_lineEditAuthor_textChanged(const QString newText) {
 
     undoStack->push(cmd);
 
-    cmd->ci.optionsTab = true;
+    cmd->ci.tab = MainWindow::iTabOptions;
 
     if (undoStack->count() == iStartStringEditCount) {
         bStartStringEditing = false;
@@ -307,7 +307,7 @@ void OptionsTab::on_lineEditSongName_textChanged(const QString newText) {
 
     undoStack->push(cmd);
 
-    cmd->ci.optionsTab = true;
+    cmd->ci.tab = MainWindow::iTabOptions;
 
     if (undoStack->count() == iStartStringEditCount) {
         bStartStringEditing = false;
@@ -334,7 +334,7 @@ void OptionsTab::on_plainTextEditComment_textChanged() {
 
     undoStack->push(cmd);
 
-    cmd->ci.optionsTab = true;
+    cmd->ci.tab = MainWindow::iTabOptions;
 
     if (undoStack->count() == iStartStringEditCount) {
         bStartStringEditing = false;

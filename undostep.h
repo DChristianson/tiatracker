@@ -4,14 +4,10 @@
 #include <QObject>
 
 struct commandInfo {
+    int tab = -1;
     int selectedChannel = -1;
     int editPosFrom = -1;
     int editPosTo = -1;
-    bool trackStats = false;
-    bool trackTab = false;
-    bool optionsTab = false;
-    bool instrumentTab = false;
-    bool percussionTab = false;
 };
 
 class UndoStep : public QObject

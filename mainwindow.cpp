@@ -251,31 +251,28 @@ void MainWindow::updateWithCommandInfos(bool undo, const QString& text, const co
 {
     statusBar()->showMessage((undo?"Undone: ":"Done: ") + text);
 
-    // options first for pitch guide
-    if (ci.optionsTab)
-        ui->tabOptions->updateOptionsTab();
+    assert(ci.tab != -1);
 
-    int editPos = undo ? ci.editPosFrom : ci.editPosTo;
+    if (ci.tab == iTabTrack) {
 
-    if (editPos != -1) {
-        if (ci.selectedChannel != -1) {
-            ui->trackEditor->setEditPos(ci.selectedChannel, editPos);
-        }
-        else {
-            ui->trackEditor->setEditPos(editPos);
+        int editPos = undo ? ci.editPosFrom : ci.editPosTo;
+
+        if (editPos != -1) {
+            if (ci.selectedChannel != -1) {
+                ui->trackEditor->setEditPos(ci.selectedChannel, editPos);
+            }
+            else {
+                ui->trackEditor->setEditPos(editPos);
+            }
         }
     }
 
-    if (ci.trackTab)
-        ui->tabTrack->updateTrackTab();
-    else if (ci.trackStats)
-        ui->tabTrack->updateTrackStats();
-
-    if (ci.instrumentTab)
-        ui->tabInstruments->updateInstrumentsTab();
-
-    if (ci.percussionTab)
-        ui->tabPercussion->updatePercussionTab();
+    if (ui->tabWidget->currentIndex() == ci.tab) {
+        on_tabWidget_currentChanged(ci.tab);
+    }
+    else {
+        ui->tabWidget->setCurrentIndex(ci.tab);
+    }
 
     update();
 }
@@ -434,7 +431,7 @@ void MainWindow::insertFrameBefore(bool) {
             auto cmd = new SetInstrumentCommand(pTrack, ui->tabInstruments->getSelectedInstrumentIndex(), std::move(inst));
             cmd->setText("Insert frame before in instrument");
             cmd->post = pTabsUpdate;
-            cmd->ci.instrumentTab = true;
+            cmd->ci.tab = MainWindow::iTabInstruments;
             pUndoStack->push(cmd);
         }
         break;
@@ -445,7 +442,7 @@ void MainWindow::insertFrameBefore(bool) {
             auto cmd = new SetPercussionCommand(pTrack, ui->tabPercussion->getSelectedPercussionIndex(), std::move(perc));
             cmd->setText("Insert frame before in percussion");
             cmd->post = pTabsUpdate;
-            cmd->ci.percussionTab = true;
+            cmd->ci.tab = MainWindow::iTabPercussion;
             pUndoStack->push(cmd);
         }
         break;
@@ -465,7 +462,7 @@ void MainWindow::insertFrameAfter(bool) {
             auto cmd = new SetInstrumentCommand(pTrack, ui->tabInstruments->getSelectedInstrumentIndex(), std::move(inst));
             cmd->setText("Insert frame after in instrument");
             cmd->post = pTabsUpdate;
-            cmd->ci.instrumentTab = true;
+            cmd->ci.tab = MainWindow::iTabInstruments;
             pUndoStack->push(cmd);
         }
         break;
@@ -476,7 +473,7 @@ void MainWindow::insertFrameAfter(bool) {
             auto cmd = new SetPercussionCommand(pTrack, ui->tabPercussion->getSelectedPercussionIndex(), std::move(perc));
             cmd->setText("Insert frame after in percussion");
             cmd->post = pTabsUpdate;
-            cmd->ci.percussionTab = true;
+            cmd->ci.tab = MainWindow::iTabPercussion;
             pUndoStack->push(cmd);
         }
         break;
@@ -496,7 +493,7 @@ void MainWindow::deleteFrame(bool) {
             auto cmd = new SetInstrumentCommand(pTrack, ui->tabInstruments->getSelectedInstrumentIndex(), std::move(inst));
             cmd->setText("Delete frame in instrument");
             cmd->post = pTabsUpdate;
-            cmd->ci.instrumentTab = true;
+            cmd->ci.tab = MainWindow::iTabInstruments;
             pUndoStack->push(cmd);
         }
         break;
@@ -507,7 +504,7 @@ void MainWindow::deleteFrame(bool) {
             auto cmd = new SetPercussionCommand(pTrack, ui->tabPercussion->getSelectedPercussionIndex(), std::move(perc));
             cmd->setText("Delete frame in percussion");
             cmd->post = pTabsUpdate;
-            cmd->ci.percussionTab = true;
+            cmd->ci.tab = MainWindow::iTabPercussion;
             pUndoStack->push(cmd);
         }
         break;

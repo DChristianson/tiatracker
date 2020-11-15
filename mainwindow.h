@@ -154,7 +154,7 @@ private slots:
 
     void updateWithCommandInfos(bool undo, const QString& text, const commandInfo& ci);
 
-private:
+public:
     /* Tab index values */
     static const int iTabTrack = 0;
     static const int iTabInstruments = 1;
@@ -162,6 +162,7 @@ private:
     static const int iTabInfo = 3;
     static const int iTabOptions = 4;
 
+private:
     void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
     void keyReleaseEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 

@@ -277,7 +277,7 @@ void PercussionTab::on_buttonPercussionImport_clicked() {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -317,7 +317,7 @@ void PercussionTab::on_buttonPercussionDelete_clicked() {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -340,7 +340,7 @@ void PercussionTab::on_spinBoxPercussionLength_valueChanged(int newLength) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -362,7 +362,7 @@ void PercussionTab::on_checkBoxOverlay_stateChanged(int state) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -404,7 +404,7 @@ void PercussionTab::on_spinBoxPercussionVolume_valueChanged(int newVolume) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -438,7 +438,7 @@ void PercussionTab::on_comboBoxPercussion_editTextChanged(const QString &text) {
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 
@@ -486,7 +486,7 @@ void PercussionTab::volumeChanged(const QList<int>& volumes)
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -508,7 +508,7 @@ void PercussionTab::frequencyChanged(const QList<int>& frequencies)
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }
@@ -530,7 +530,7 @@ void PercussionTab::waveformChanged(const QList<TiaSound::Distortion>& waveforms
 
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.percussionTab = true;
+    cmd->ci.tab = MainWindow::iTabPercussion;
 
     undoStack->push(cmd);
 }

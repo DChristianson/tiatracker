@@ -196,7 +196,7 @@ void TrackTab::toggleGlobalTempo(bool toggled) {
     // always post step for status bar update
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.trackTab = true;
+    cmd->ci.tab = MainWindow::iTabTrack;
 
     undoStack->push(cmd);
 }
@@ -224,7 +224,7 @@ void TrackTab::setEvenSpeed(int value) {
     // always post step for status bar update
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.trackTab = true;
+    cmd->ci.tab = MainWindow::iTabTrack;
 
     undoStack->push(cmd);
 }
@@ -252,7 +252,7 @@ void TrackTab::setOddSpeed(int value) {
     // always post step for status bar update
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
-    cmd->ci.trackTab = true;
+    cmd->ci.tab = MainWindow::iTabTrack;
 
     undoStack->push(cmd);
 }
@@ -450,7 +450,7 @@ void TrackTab::insertPattern(bool doBefore) {
     upper_cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     // hold gui stuffs in the uppest command:
-    upper_cmd->ci.trackStats = true;
+    upper_cmd->ci.tab = MainWindow::iTabTrack;
 
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
@@ -505,7 +505,7 @@ void TrackTab::removePattern(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     // hold gui stuffs in the command:
-    cmd->ci.trackStats = true;
+    cmd->ci.tab = MainWindow::iTabTrack;
 
     undoStack->push(cmd);
 
@@ -542,7 +542,7 @@ void TrackTab::duplicatePattern(bool) {
     cmd->post = this->window()->findChild<UndoStep*>("TabsUpdate");
 
     // hold gui stuffs in the command:
-    cmd->ci.trackStats = true;
+    cmd->ci.tab = MainWindow::iTabTrack;
 
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
@@ -585,6 +585,7 @@ void TrackTab::setSlideValue(bool) {
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
     // hold gui stuffs in cmd:
+    cmd->ci.tab = MainWindow::iTabTrack;
     cmd->ci.selectedChannel = contextEventChannel;
     cmd->ci.editPosFrom = pe->getEditPos();
     cmd->ci.editPosTo = pe->getEditPos() + 1;
@@ -621,6 +622,7 @@ void TrackTab::setFrequency(bool) {
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
     // hold gui stuffs in cmd:
+    cmd->ci.tab = MainWindow::iTabTrack;
     cmd->ci.selectedChannel = contextEventChannel;
     cmd->ci.editPosFrom = pe->getEditPos();
     cmd->ci.editPosTo = pe->getEditPos() + 1;
@@ -647,6 +649,7 @@ void TrackTab::setHold(bool) {
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
     // hold gui stuffs in cmd:
+    cmd->ci.tab = MainWindow::iTabTrack;
     cmd->ci.selectedChannel = contextEventChannel;
     cmd->ci.editPosFrom = pe->getEditPos();
     cmd->ci.editPosTo = pe->getEditPos() + 1;
@@ -673,6 +676,7 @@ void TrackTab::setPause(bool) {
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
     // hold gui stuffs in cmd:
+    cmd->ci.tab = MainWindow::iTabTrack;
     cmd->ci.selectedChannel = contextEventChannel;
     cmd->ci.editPosFrom = pe->getEditPos();
     cmd->ci.editPosTo = pe->getEditPos() + 1;
@@ -706,6 +710,8 @@ void TrackTab::deleteRow(bool) {
 
     PatternEditor *pe = findChild<PatternEditor *>("trackEditor");
 
+    // hold gui stuffs in cmd:
+    cmd->ci.tab = MainWindow::iTabTrack;
     cmd->ci.editPosFrom = pe->getEditPos();
 
     emit validateEditPos();
