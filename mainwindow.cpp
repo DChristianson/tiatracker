@@ -317,6 +317,7 @@ void MainWindow::setPitchGuide(TiaSound::PitchGuide *newGuide) {
 /*************************************************************************/
 
 void MainWindow::setWaveform(TiaSound::Distortion dist) {
+    assert(pPitchGuide != nullptr);
     TiaSound::InstrumentPitchGuide *pIPG = &(pPitchGuide->instrumentGuides[dist]);
     ui->pianoKeyboard->setInstrumentPitchGuide(pIPG);
 }

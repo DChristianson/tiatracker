@@ -106,15 +106,20 @@ void OptionsTab::updateOptionsTab() {
             break;
         }
     }
-    emit setPitchGuide(pitchGuide); 
-    if (pitchGuide) {
-        QString tvText = (pitchGuide->tvStandard == TiaSound::TvStandard::PAL ? "PAL" : "NTSC");
-        infoLabel->setText("(" + tvText + ", " + QString::number(pitchGuide->baseFreq) + "Hz)");
-    }
-    else {
-        infoLabel->setText("");
+
+    // if no pitchGuide is in the ttt file, we use to the default one
+    // ie the first one: PAL 440Hz
+    if (pitchGuide == nullptr) {
+        pitchGuide = &guides[0];
+        cbGuides->blockSignals(true);
+        cbGuides->setCurrentIndex(0);
+        cbGuides->blockSignals(false);
     }
 
+    QString tvText = (pitchGuide->tvStandard == TiaSound::TvStandard::PAL ? "PAL" : "NTSC");
+    infoLabel->setText("(" + tvText + ", " + QString::number(pitchGuide->baseFreq) + "Hz)");
+    emit setPitchGuide(pitchGuide);
+ 
     // Off-tune warning
     QSpinBox* spinBoxOffTuneThreshold = findChild<QSpinBox *>("spinBoxOffTuneThreshold");
     spinBoxOffTuneThreshold->blockSignals(true);
