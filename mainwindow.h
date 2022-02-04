@@ -16,6 +16,7 @@
 #include "emulation/player.h"
 #include "trackcommand.h"
 #include "undostep.h"
+#include "assert.h"
 
 #include <QList>
 #include <QMenu>

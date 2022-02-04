@@ -43,11 +43,14 @@ protected:
 
     void contextMenuEvent(QContextMenuEvent *event) Q_DECL_OVERRIDE;
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void processMouseEvent(int x, int y);
+    void mouseReleaseEvent(QMouseEvent *) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *) Q_DECL_OVERRIDE;
 
 private:
     int calcWidth();
-
+    bool isMouseDragging = false;
     // The percussion to edit
     Track::Percussion *pPercussion = nullptr;
 

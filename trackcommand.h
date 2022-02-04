@@ -5,7 +5,7 @@
 
 #include "track/track.h"
 #include "track/note.h"
-
+#include "assert.h"
 #include "undostep.h"
 
 class TrackCommand : public QUndoCommand

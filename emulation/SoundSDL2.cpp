@@ -43,10 +43,10 @@ SoundSDL2::SoundSDL2(TIASound *tiasound)
   // This fixes a bug most prevalent with ATI video cards in Windows,
   // whereby sound stopped working after the first video change
   SDL_AudioSpec desired;
-  desired.freq   = 44100;
+  desired.freq   = 48000;
   desired.format = AUDIO_S16SYS;
   desired.channels = 2;
-  desired.samples  = 1024;
+  desired.samples  = 512; //1024 is too many
   desired.callback = callback;
   desired.userdata = static_cast<void*>(this);
 
@@ -212,7 +212,7 @@ void SoundSDL2::set(uInt16 addr, uInt8 value, Int32 cycle)
 
   // First, calculate how many seconds would have past since the last
   // register write on a real 2600
-  double delta = double(cycle - myLastRegisterSetCycle) / 1193191.66666667;
+  double delta = double(cycle - myLastRegisterSetCycle) / 1193333.66666667;
 
   // Now, adjust the time based on the frame rate the user has selected. For
   // the sound to "scale" correctly, we have to know the games real frame 

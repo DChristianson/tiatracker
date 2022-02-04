@@ -140,9 +140,9 @@ void PercussionShaper::processMouseEvent(int x, int y) {
         int iValue = int(x/cellWidth);
         int newValue = scaleMax - int(y/cellHeight);
         // If we're dragging already, use that index instead
-        if (draggingIndex != -1) {
-            iValue = draggingIndex;
-        }
+        //if (draggingIndex != -1) {
+        //    iValue = draggingIndex;
+        //}
         // Sanity check in case area is some pixels bigger than graph area
         if (iValue >=0 && iValue < pPercussion->getEnvelopeLength()
                 && newValue >= scaleMin && newValue <= scaleMax) {

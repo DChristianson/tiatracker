@@ -108,14 +108,33 @@ void WaveformShaper::contextMenuEvent(QContextMenuEvent *event) {
 
 /*************************************************************************/
 
-void WaveformShaper::mousePressEvent(QMouseEvent *event) {
-    if (event->button() == Qt::LeftButton) {
-        if (event->x() >= legendCellSize && event->y() < valueAreaHeight) {
-           int column = (event->x() - legendCellSize)/cellWidth;
+void WaveformShaper::processMouseEvent(int x, int y) {
+    int iValue = int(x/cellWidth);  //this is to make sure mouse is not out of bounds of the waveform box
+    if (iValue >=0 && iValue <= pPercussion->getEnvelopeLength()) {
+        if (x >= legendCellSize && y < valueAreaHeight) {
+           int column = (x - legendCellSize)/cellWidth;
            values[column] = distortionPen;
            update();
            emit valuesChanged(values);
         }
+    }
+
+}
+
+void WaveformShaper::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) {
+        isMouseDragging = true;
+        processMouseEvent(event->x(), event->y());
+    }
+}
+//added these events from envelopeshaper to handle dragging
+void WaveformShaper::mouseReleaseEvent(QMouseEvent *) {
+    isMouseDragging = false;
+}
+
+void WaveformShaper::mouseMoveEvent(QMouseEvent *event) {
+    if (isMouseDragging) {
+        processMouseEvent(event->x(), event->y());
     }
 }
 

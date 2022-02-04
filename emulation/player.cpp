@@ -58,7 +58,7 @@ void Player::setFrameRate(float rate) {
 
 /*************************************************************************/
 
-void Player::startTimer() {
+/*void Player::startTimer() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     double lastReplayTime = 0;
@@ -88,12 +88,29 @@ void Player::startTimer() {
             lastReplayTime += frameDuration;
         }
     }
+    //eTimer = new QElapsedTimer;
+    //eTimer->start();
+}*/
 
-/*
-    eTimer = new QElapsedTimer;
-    eTimer->start();
-*/
+//new startTimer code that uses mssleep and does not cut out other frames as much
+void Player::startTimer() {
+    QElapsedTimer elapsedTimer;
+    elapsedTimer.start();
+    double lastReplayTime = 0;
+    doReplay = true;
+    //unsigned long long timestamp;
+    // Replay loop
+
+    while (doReplay) {
+        double frameDuration = replayTvStandard == TiaSound::TvStandard::PAL ? 1000.0/50.0 : 1000.0/60.0;
+        timerFired();
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
+        lastReplayTime += frameDuration;
+        QThread::msleep(lastReplayTime-elapsedTimer.elapsed());
+    }
+
 }
+
 
 /*************************************************************************/
 
