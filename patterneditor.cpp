@@ -25,12 +25,12 @@ PatternEditor::PatternEditor(QWidget *parent) : QWidget(parent)
     legendFont.setPixelSize(legendFontSize);
     QFontMetrics legendFontMetrics(legendFont);
     legendFontHeight = legendFontMetrics.height();
-    timeAreaWidth = legendFontMetrics.width("000:00");
+    timeAreaWidth = legendFontMetrics.horizontalAdvance("000:00");
 
     noteFont.setPixelSize(noteFontSize);
     QFontMetrics noteFontMetrics(noteFont);
     noteFontHeight = noteFontMetrics.height();
-    noteAreaWidth = noteFontMetrics.width("000: C#4 I7 31")
+    noteAreaWidth = noteFontMetrics.horizontalAdvance("000: C#4 I7 31")
             + 2*noteMargin;
 
     widgetWidth = 2*patternNameWidth
@@ -514,7 +514,7 @@ void PatternEditor::paintEvent(QPaintEvent *) {
 /*************************************************************************/
 
 void PatternEditor::wheelEvent(QWheelEvent *event) {
-    int newPos = editPos - event->delta()/100;
+    int newPos = editPos - event->angleDelta().y()/100;
     setEditPos(newPos);
 }
 

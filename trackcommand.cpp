@@ -148,13 +148,13 @@ MovePatternCommand::MovePatternCommand(Track::Track* track, int channel, int ent
 
 void MovePatternCommand::do_undo()
 {
-    pTrack->channelSequences[iChannel].sequence.swap(iEntryIndexTo, iEntryIndexFrom);
+    pTrack->channelSequences[iChannel].sequence.swapItemsAt(iEntryIndexTo, iEntryIndexFrom);
     pTrack->updateFirstNoteNumbers();
 }
 
 void MovePatternCommand::do_redo()
 {
-    pTrack->channelSequences[iChannel].sequence.swap(iEntryIndexFrom, iEntryIndexTo);
+    pTrack->channelSequences[iChannel].sequence.swapItemsAt(iEntryIndexFrom, iEntryIndexTo);
     pTrack->updateFirstNoteNumbers();
 }
 

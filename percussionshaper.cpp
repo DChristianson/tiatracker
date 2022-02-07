@@ -54,7 +54,7 @@ void PercussionShaper::drawLegend(QPainter &painter,
     painter.setFont(legendFont);
     painter.save();
     painter.rotate(-90);
-    int nameLength = painter.fontMetrics().width(name);
+    int nameLength = painter.fontMetrics().horizontalAdvance(name);
     painter.drawText(0-(valuesHeight - nameLength)/2 - nameLength, 16, name);
     painter.restore();
     // Scale
